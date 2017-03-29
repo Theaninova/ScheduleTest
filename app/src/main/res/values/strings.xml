@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">myRoRo Beta</string>
+    <string name="title_activity_login">Bitte Einloggen</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Benutzername</string>
+    <string name="prompt_password">Passwort</string>
+    <string name="action_sign_in">Einloggen</string>
+    <string name="action_sign_in_short">Einstellungen</string>
+    <string name="error_incorrect_password">Falsches Passwort oder Benutzername!</string>
+    <string name="error_field_required">Dieses Feld wird benötigt</string>
+
+    <string name="title_activity_today">[Datum Heute]</string>
+    <string name="large_text">AN EROOR OCCURED</string>
+    <string name="action_settings">Einstellungen</string>
+    <string name="title_activity_tomorrow">[Datum Morgen]</string>
+    <string name="title_activity_main2">Main2Activity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="compose_shortcut_short_label1">Test</string>
+    <string name="compose_shortcut_long_label1">TestTest</string>
+    <string name="compose_disabled_message1">Test1</string>
+</resources>
