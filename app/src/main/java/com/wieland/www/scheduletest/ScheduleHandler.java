@@ -138,7 +138,7 @@ public class ScheduleHandler {
                 }
 
                 if(take) {
-                    for(int i = 1; i <= 6; i++) {
+                    for(int i = 1; i <= 6; i++) { //TODO: implement the info
                         if (tds.get(i).text().equals("\u00a0")) {
                             myList.add("null");
                         } else {
@@ -160,13 +160,32 @@ public class ScheduleHandler {
             return null;
 
         String output = "";
-        output = myList.get(0) + ". ";
+        if(myList.get(0).equals("null"))
+            output = "^ ";
+        else
+            output = myList.get(0) + ". ";
 
         if (myList.get(4) == "null") {
-            output = output + myList.get(1);
+            if(myList.get(1).equals("null"))
+                output = output + "[Fach]";
+            else
+                output = output + myList.get(1);
         } else {
-            output = output + myList.get(5);
+            output = output + myList.get(4);
         }
+
+        if (myList.get(3).contains("*Frei")) {
+            output = output + ": Frei!";
+            return output;
+        } else if (myList.get(3).contains("Raum�nderung")) {
+            output = output + ": Raumänderung in Raum " + myList.get(5);
+            return output;
+        } else if (myList.get(3).contains("*Stillarbeit")) {
+            //if (myList.get(3) == "null")  //TODO: Stillarbeit Teacher
+                output = output + ": Stillarbeit in Raum";
+            return output;
+        }
+
 
         output = output + " bei ";
 
@@ -179,7 +198,10 @@ public class ScheduleHandler {
         output = output + " in Raum ";
 
         if (myList.get(5) == "null") {
-            output = output + myList.get(2);
+            if(myList.get(2).equals("null"))
+                output = output + "[Raum]";
+            else
+                output = output + myList.get(2);
         } else {
             output = output + myList.get(5);
         }
