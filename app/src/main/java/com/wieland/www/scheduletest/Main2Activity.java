@@ -235,8 +235,14 @@ public class Main2Activity extends AppCompatActivity
         myList.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         myList.setLayoutManager(layoutManager);
+        //ArrayList u = new ArrayList();
+        ScheduleHandler myHandler;
+        myHandler = new ScheduleHandler(doc);
 
-        Layout_Row adapter = new Layout_Row(willBeSet, this);
+        willBeSet.clear();
+        willBeSet = myHandler.getClassList();
+
+        Layout_Row adapter = new Layout_Row(willBeSet, doc, this);
         myList.setAdapter(adapter);
     }
 

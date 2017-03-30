@@ -6,8 +6,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
+import org.jsoup.nodes.Document;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,13 +24,13 @@ import java.util.List;
 public class Layout_Row extends RecyclerView.Adapter<Layout_Row.Layout_Holder> {
 
     private List<String> listData;
-    private RecyclerView recyclerView;
     private LayoutInflater inflater;
-    private Layout_Row_Row rowRow;
+    private Document doc;
 
-    public Layout_Row(List<String> listData, Context context) {
+    public Layout_Row(List<String> listData, Document doc, Context context) {
         this.inflater = LayoutInflater.from(context);
         this.listData = listData;
+        this.doc = doc;
     }
 
     @Override
@@ -36,18 +42,30 @@ public class Layout_Row extends RecyclerView.Adapter<Layout_Row.Layout_Holder> {
     @Override
     public void onBindViewHolder(Layout_Holder holder, int position) {
         String item = listData.get(position);
-        holder.title.setText(item);
+        ScheduleHandler myNewHandler = new ScheduleHandler(this.doc);
         ArrayList<String> rowrowList = new ArrayList<>();
-        rowrowList.add(listData.get(position));
-        rowrowList.add(listData.get(position));
-        rowrowList.add(listData.get(position));
-        rowrowList.add(listData.get(position));
-        rowrowList.add(listData.get(position));
-        rowrowList.add(listData.get(position));
-        rowrowList.add(listData.get(position));
-        rowrowList.add(listData.get(position));
+        boolean theExit = true;
+        int counter = 0;
+        while (theExit) {
+            String z = myNewHandler.getLine(counter, item);
+            if(z == null)
+                theExit = false;
+            else
+                rowrowList.add(z.toString());
+            counter++;
+        }
 
-        holder.adapter.setListData(rowrowList);
+        
+        
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(holder.itemView.getContext(),
+                android.R.layout.simple_list_item_1,
+                android.R.id.text1,
+                rowrowList);
+
+        holder.title.setText(item);
+        holder.recyclerView.setAdapter(adapter);
+
+        setListViewHeightBasedOnItems(holder.recyclerView);
     }
 
     @Override
@@ -57,20 +75,43 @@ public class Layout_Row extends RecyclerView.Adapter<Layout_Row.Layout_Holder> {
 
     class Layout_Holder extends RecyclerView.ViewHolder {
 
-        Layout_Row_Row adapter;
         private TextView title;
-        private RecyclerView recyclerView;
-        //private View conainer;
+        private ListView recyclerView;
 
         public Layout_Holder(View itemView) {
             super(itemView);
 
             title = (TextView) itemView.findViewById(R.id.textTitleRow);
-            recyclerView = (RecyclerView) itemView.findViewById(R.id.innerList);
-            recyclerView.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
-            adapter = new Layout_Row_Row();
-            recyclerView.setAdapter(adapter);
-            //conainer = itemView.findViewById(R.id.thListOfDoom);
+            recyclerView = (ListView) itemView.findViewById(R.id.innerList);
         }
+    }
+
+    public static boolean setListViewHeightBasedOnItems(ListView listView) {
+
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter != null) {
+
+            int numberOfItems = listAdapter.getCount();
+            int totalItemsHeight = 0;
+            for (int itemPos = 0; itemPos < numberOfItems; itemPos++) {
+                View item = listAdapter.getView(itemPos, null, listView);
+                item.measure(0, 0);
+                totalItemsHeight += item.getMeasuredHeight();
+            }
+
+            int totalDividersHeight = listView.getDividerHeight() *
+                    (numberOfItems - 1);
+
+            ViewGroup.LayoutParams params = listView.getLayoutParams();
+            params.height = totalItemsHeight + totalDividersHeight;
+            listView.setLayoutParams(params);
+            listView.requestLayout();
+
+            return true;
+
+        } else {
+            return false;
+        }
+
     }
 }
