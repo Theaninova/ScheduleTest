@@ -16,7 +16,7 @@
             android:label="@string/title_activity_login" />
         <activity
             android:name=".Main2Activity"
-            android:label="@string/app_name"
+            android:label="@string/mainTitle_date"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -25,8 +25,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
-                    android:host="www.romain-rolland-gymnasium.eu" />
+                    android:host="www.romain-rolland-gymnasium.eu/schuelerbereich/"
+                    android:scheme="http" />
             </intent-filter>
         </activity>
         <activity
@@ -41,6 +41,14 @@
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
+        </activity>
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".Main2Activity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.wieland.www.scheduletest.Main2Activity" />
         </activity>
     </application>
 

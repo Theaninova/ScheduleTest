@@ -3,11 +3,11 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_camera"
+            android:id="@+id/nav_heute"
             android:icon="@drawable/ic_menu_today"
             android:title="Heute" />
         <item
-            android:id="@+id/nav_gallery"
+            android:id="@+id/nav_morgen"
             android:icon="@drawable/ic_menu_tomorrow"
             android:title="Morgen" />
         <item
@@ -15,7 +15,7 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="Personalisierte Ansicht (WIP)" />
         <item
-            android:id="@+id/nav_manage"
+            android:id="@+id/nav_settings"
             android:icon="@drawable/ic_menu_manage"
             android:title="Einstellungen" />
     </group>

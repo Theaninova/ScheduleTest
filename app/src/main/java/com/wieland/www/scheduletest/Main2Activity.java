@@ -1,10 +1,14 @@
 package com.wieland.www.scheduletest;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -20,6 +24,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.jsoup.nodes.Document;
@@ -37,21 +42,24 @@ public class Main2Activity extends AppCompatActivity
     SwipeRefreshLayout SwipeRefresh;
     RecyclerView myList;
 
+    MenuItem menu_today;
+
+    private View mProgressView;
+    private View mLoginFormView;
+
     private boolean TodaySelected = true; //for Swipe to Refresh
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main2);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //MainText = (TextView) findViewById(R.id.textViewMain2);
         SwipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
 
         myList = (RecyclerView) findViewById(R.id.theListOfDoom);
-
-        //MainText.setText("");
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -72,34 +80,35 @@ public class Main2Activity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         SwipeRefresh.setOnRefreshListener(this);
 
+        mLoginFormView = findViewById(R.id.swiperefresh);
+        mProgressView = findViewById(R.id.progressBar12);
+
+
+
 
         SharedPreferences preferences = getSharedPreferences("Tralala", MODE_PRIVATE);
         try {
-            this.setText(Schedule.getSchedule(1, preferences.getString("set_username", "-1"), preferences.getString("set_password", "-1")));
+            Schedule.refresh(getApplicationContext());
         } catch (IOException e) {
-            //MainText.setText(e.getMessage());
             if (e.getMessage() == "HTTP error fetching URL") {
                 Intent intent = new Intent(this, LoginActivity.class);
                 startActivity(intent);
             } else {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
 
-                alertDialogBuilder.setTitle("Fehler");
-                alertDialogBuilder.setMessage("Keine Internetverbindung");
+                alertDialogBuilder.setTitle("Verbindungsfehler");
+                alertDialogBuilder.setMessage("Gespeicherter Plan von " + Schedule.getDate(1, getApplicationContext()) + " und " + Schedule.getDate(2, getApplicationContext()) + " wird geladen.");
                 alertDialogBuilder.setCancelable(false);
                 alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        System.exit(0);
                     }
-                })
-                        .setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                            }
-                        });
+                });
                 AlertDialog alertDialog = alertDialogBuilder.create();
                 alertDialog.show();
             }
         }
+
+        this.setText(Schedule.getSchedule(1, getApplicationContext()), 1);
     }
 
     @Override
@@ -145,65 +154,28 @@ public class Main2Activity extends AppCompatActivity
         //SharedPreferences.Editor editor = sharedPref.edit();
         SharedPreferences preferences = getSharedPreferences("Tralala", MODE_PRIVATE);
 
-        if (id == R.id.nav_camera) {
-            //do {
-            try {
-                this.setText(Schedule.getSchedule(1, preferences.getString("set_username", "-1"), preferences.getString("set_password", "-1")));
-                TodaySelected = true;
-            } catch (IOException e) {
-                //MainText.setText(e.getMessage());
-                if (e.getMessage() == "HTTP error fetching URL") {
-                    Intent intent = new Intent(this, LoginActivity.class);
-                    startActivity(intent);
-                } else {
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        if (id == R.id.nav_heute) {
+            showProgress(true);
 
-                    alertDialogBuilder.setTitle("Fehler");
-                    alertDialogBuilder.setMessage("Keine Internetverbindung");
-                    alertDialogBuilder.setCancelable(false);
-                    alertDialogBuilder.setPositiveButton("Erneut versuchen", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                        }
-                    })
-                            .setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                }
-                            });
-                    AlertDialog alertDialog = alertDialogBuilder.create();
-                    alertDialog.show();
-                }
-            }
-            //} while (willBeRepeated);
-        } else if (id == R.id.nav_gallery) {
-            try {
-                this.setText(Schedule.getSchedule(2, preferences.getString("set_username", "default"), preferences.getString("set_password", "default")));
-                TodaySelected = false;
-            } catch (IOException e) {
-                if (e.getMessage() == "HTTP error fetching URL") {
-                    Intent intent = new Intent(this, LoginActivity.class);
-                    startActivity(intent);
-                } else {
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            this.setText(Schedule.getSchedule(1, getApplicationContext()), 1);
+            TodaySelected = true;
 
-                    alertDialogBuilder.setTitle("Fehler");
-                    alertDialogBuilder.setMessage("Keine Internetverbindung");
-                    alertDialogBuilder.setCancelable(false);
-                    alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            System.exit(0);
-                        }
-                    })
-                            .setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                }
-                            });
-                    AlertDialog alertDialog = alertDialogBuilder.create();
-                    alertDialog.show();
-                }
-            }
+            showProgress(false);
+        } else if (id == R.id.nav_morgen) {
+            showProgress(true);
+
+            this.setText(Schedule.getSchedule(2, getApplicationContext()), 2);
+            TodaySelected = false;
+
+            showProgress(false);
         } else if (id == R.id.nav_slideshow) {
 
-        } else if (id == R.id.nav_manage) {
+            //Intent intent = new Intent(this, Detailed_View.class);
+            //startActivity(intent);
+
+        } else if (id == R.id.nav_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
 
         } else if (id == R.id.nav_share) {
 
@@ -218,7 +190,7 @@ public class Main2Activity extends AppCompatActivity
         return true;
     }
 
-    private void setText(Document doc) {
+    private void setText(Document doc, int index) {
         ArrayList<String> willBeSet = new ArrayList<>();
 
         for (org.jsoup.nodes.Element table : doc.select("table")) {
@@ -237,7 +209,6 @@ public class Main2Activity extends AppCompatActivity
         myList.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         myList.setLayoutManager(layoutManager);
-        //ArrayList u = new ArrayList();
         ScheduleHandler myHandler;
         myHandler = new ScheduleHandler(doc);
 
@@ -246,11 +217,48 @@ public class Main2Activity extends AppCompatActivity
 
         Layout_Row adapter = new Layout_Row(willBeSet, doc, this);
         myList.setAdapter(adapter);
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+
+        // get menu from navigationView
+        Menu menu = navigationView.getMenu();
+
+        String putIn = "";
+        if(Schedule.getDate(1, getApplicationContext()).contains("erscheint"))
+            putIn = "Nicht verfügbar.";
+        else
+            putIn = Schedule.getDate(1, getApplicationContext());
+
+        // find MenuItem you want to change
+        MenuItem nav_camara = menu.findItem(R.id.nav_heute);
+        nav_camara.setTitle(putIn);
+
+        if(Schedule.getDate(2, getApplicationContext()).contains("erscheint"))
+            putIn = "Nicht verfügbar.";
+        else
+            putIn = Schedule.getDate(2, getApplicationContext());
+
+        MenuItem nav_gallery = menu.findItem(R.id.nav_morgen);
+        nav_gallery.setTitle(putIn);
+
+        // add NavigationItemSelectedListener to check the navigation clicks
+        navigationView.setNavigationItemSelectedListener(this);
+
+        setTitle(Schedule.getDate(index, getApplicationContext()));
+
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("Tralala", MODE_PRIVATE);
+
+        //Header set username, just some cosmetic stuff
+        NavigationView menu2 = (NavigationView) findViewById(R.id.nav_view);
+        View mHeaderView = menu2.getHeaderView(0);
+        TextView username_view = (TextView) mHeaderView.findViewById(R.id.textView_username);
+        username_view.setText(pref.getString("set_username", "[Nutzername]"));
     }
 
     @Override
     public void onRefresh() {
-
+        SwipeRefresh.animate();
+        SwipeRefresh.setRefreshing(true);
         int OneOrTwo = 1;
 
         if (TodaySelected)  //so that the right page will be updated, before when swiping down only the first page was being loaded
@@ -261,18 +269,56 @@ public class Main2Activity extends AppCompatActivity
         SharedPreferences preferences = getSharedPreferences("Tralala", MODE_PRIVATE);
 
         try {
-            this.setText(Schedule.getSchedule(OneOrTwo, preferences.getString("set_username", "-1"), preferences.getString("set_password", "-1")));
+            Schedule.refresh(getApplicationContext());
             SwipeRefresh.setRefreshing(false);
         } catch (IOException e) {
             SwipeRefresh.setRefreshing(false);
-            //MainText.setText(e.getMessage());
             if (e.getMessage() == "HTTP error fetching URL") {
                 Intent intent = new Intent(this, LoginActivity.class);
                 startActivity(intent);
             } else {
-                Toast toast = Toast.makeText(getApplicationContext(), "keine Verbindung möglich", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(getApplicationContext(), "Keine Verbindung möglich.", Toast.LENGTH_SHORT);
                 toast.show();
             }
+        }
+
+        this.setText(Schedule.getSchedule(OneOrTwo, getApplicationContext()), OneOrTwo);
+    }
+
+    /**
+     * Shows the progress UI and hides the login form.
+     * AUTOGENERATED
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    private void showProgress(final boolean show) {
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                }
+            });
+
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mProgressView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        } else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
 }

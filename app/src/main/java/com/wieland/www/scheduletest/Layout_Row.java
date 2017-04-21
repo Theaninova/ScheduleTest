@@ -3,6 +3,7 @@ package com.wieland.www.scheduletest;
 import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,6 +62,8 @@ public class Layout_Row extends RecyclerView.Adapter<Layout_Row.Layout_Holder> {
                 android.R.layout.simple_list_item_1,
                 android.R.id.text1,
                 rowrowList);
+
+        holder.recyclerView.setEnabled(false);
 
         holder.title.setText(item);
         holder.recyclerView.setAdapter(adapter);
