@@ -2,7 +2,7 @@
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
     <shortcut
         android:enabled="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_menu_today"
         android:shortcutDisabledMessage="@string/compose_disabled_message1"
         android:shortcutId="compose"
         android:shortcutLongLabel="@string/compose_shortcut_long_label1"
@@ -16,5 +16,55 @@
         they launch this shortcut. -->
         <categories android:name="android.shortcut.conversation" />
     </shortcut>
-    <!-- Specify more shortcuts here. -->
+
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_menu_tomorrow"
+        android:shortcutDisabledMessage="@string/compose_disabled_message1"
+        android:shortcutId="compose1"
+        android:shortcutLongLabel="@string/compose_shortcut_long_label2"
+        android:shortcutShortLabel="@string/compose_shortcut_short_label2">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.wieland.www.scheduletest.Main2Activity"
+            android:targetPackage="com.wieland.www.scheduletest" />
+        <!-- If your shortcut is associated with multiple intents, include them
+        here. The last intent in the list determines what the user sees when
+        they launch this shortcut. -->
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_menu_share"
+        android:shortcutDisabledMessage="@string/compose_disabled_message1"
+        android:shortcutId="compose2"
+        android:shortcutLongLabel="@string/compose_shortcut_long_label3"
+        android:shortcutShortLabel="@string/compose_shortcut_short_label3">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.wieland.www.scheduletest.Main2Activity"
+            android:targetPackage="com.wieland.www.scheduletest" />
+        <!-- If your shortcut is associated with multiple intents, include them
+        here. The last intent in the list determines what the user sees when
+        they launch this shortcut. -->
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_menu_send"
+        android:shortcutDisabledMessage="@string/compose_disabled_message1"
+        android:shortcutId="compose3"
+        android:shortcutLongLabel="@string/compose_shortcut_long_label4"
+        android:shortcutShortLabel="@string/compose_shortcut_short_label4">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.wieland.www.scheduletest.Main2Activity"
+            android:targetPackage="com.wieland.www.scheduletest" />
+        <!-- If your shortcut is associated with multiple intents, include them
+        here. The last intent in the list determines what the user sees when
+        they launch this shortcut. -->
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
 </shortcuts>

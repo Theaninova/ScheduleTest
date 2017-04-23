@@ -42,14 +42,7 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity>
-        <activity
-            android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings"
-            android:parentActivityName=".Main2Activity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.wieland.www.scheduletest.Main2Activity" />
-        </activity>
+        <activity android:name=".SettingsActivity"></activity>
     </application>
 
 </manifest>

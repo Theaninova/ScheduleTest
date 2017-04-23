@@ -15,12 +15,12 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="Personalisierte Ansicht (WIP)" />
         <item
-            android:id="@+id/nav_settings"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Einstellungen" />
+            android:id="@+id/nav_news"
+            android:icon="@drawable/ic_news"
+            android:title="News" />
     </group>
 
-    <item android:title="Communicate">
+    <item android:title="Links">
         <menu>
             <item
                 android:id="@+id/nav_share"

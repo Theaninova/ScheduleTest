@@ -14,87 +14,9 @@ import java.util.ArrayList;
 public class ScheduleHandler {
     Document doc;
     private ArrayList<String> myList = new ArrayList<>();
-    private int linePosition;
 
     public ScheduleHandler(Document doc) {
         this.doc = doc;
-    }
-
-    /**
-     * This will be useless in future
-     *
-     * @return a list with all the things are displayed in every row and column of the schedule
-     */
-    public ArrayList<String> getAll() {
-        myList.clear();
-
-        for (org.jsoup.nodes.Element table : doc.select("table")) {
-            for (org.jsoup.nodes.Element row : table.select("tr")) {
-                Elements tds = row.select("td");
-                myList.add(tds.get(0).text());
-                myList.add(tds.get(1).text());
-                myList.add(tds.get(2).text());
-                myList.add(tds.get(3).text());
-                myList.add(tds.get(4).text());
-                myList.add(tds.get(5).text());
-                myList.add(tds.get(6).text());
-                myList.add(tds.get(7).text());
-
-            }
-        }
-
-        return myList;
-    }
-
-
-    /**
-     * @param thisClass the name of the class, for example "07d". Notice that the "0" at the beginning is important. "7d" != "07d"
-     * @return a list of every Item which is useful for a specific class
-     */
-    public ArrayList<String> getClass(String thisClass) {
-        myList.clear();
-
-        ArrayList<String> outputList = new ArrayList<>();
-
-        if(!myList.isEmpty()) {
-            while (myList.get(0) != thisClass) {
-                if (!(myList.size() == 1))
-                    myList.remove(0);
-                else {
-                    myList.add("&null&");
-                    break;
-                }
-            }
-        }
-        else
-            outputList.add("&null&");
-
-        if(!outputList.isEmpty()) {
-            if (!(outputList.get(0) == "&null&")) {
-                while ((myList.get(0) == thisClass) ||
-                        (myList.get(0) == "") ||
-                        (myList.get(0) == " ") ||
-                        (myList.get(0) == "Kl.")) {
-
-                    if (!myList.isEmpty()) {
-                        if (!(myList.get(0) == "Kl.")) {
-                            for (int i = 0; i <= 7; i++) {
-                                outputList.add(myList.get(0));
-                                myList.remove(0);
-                            }
-                        } else {
-                            for (int i = 0; i <= 7; i++) {
-                                myList.remove(0);
-                            }
-                        }
-                    } else {
-                        break;
-                    }
-                }
-            }
-        }
-
-        return outputList;
     }
 
     /**
@@ -120,11 +42,18 @@ public class ScheduleHandler {
         return outputList;
     }
 
+    /**
+     *
+     * @param linePosition the current position in all the rows of a class
+     * @param thisClass needed to figure out weather the line specified up is still relevant for the class
+     * @return a single String with all the information from a specific row in the table
+     */
     public String getLine(int linePosition, String thisClass) {
         myList.clear();
 
         boolean take = false;
         boolean inClass = false;
+        boolean forInfo = true;
 
         for (org.jsoup.nodes.Element table : doc.select("table")) {
             for (org.jsoup.nodes.Element row : table.select("tr")) {
@@ -184,37 +113,41 @@ public class ScheduleHandler {
 
         if (myList.get(3).contains("*Frei")) {
             output = output + " entfällt";
-            return output;
+            forInfo = false;
         } else if (myList.get(3).contains("Raum�nderung")) {
             output = output + ": Raumänderung in Raum " + myList.get(5);
-            return output;
+            forInfo = false;
         } else if (myList.get(3).contains("*Stillarbeit")) {
             //if (myList.get(3) == "null")  //TODO: Stillarbeit Teacher
-                output = output + ": Stillarbeit in Raum";
-            return output;
+            if (myList.get(2).equals("null"))
+                output = output + ": Stillarbeit";
+            else
+                output = output + "Stillarbeit in Raum " + myList.get(2);
+            forInfo = false;
         }
 
 
-        output = output + " bei ";
+        if (forInfo) {
+            output = output + " bei ";
 
-        if (myList.get(3) == "null") {
-            output = output + "[Lehrer]";
-        } else {
-            output = output + getColoredSpanned(myList.get(3), "ff0000");
-        }
-
-
-
-        if (myList.get(5) == "null") {
-            if(myList.get(2).equals("null"))
-                output = output + " in [Raum]";
-            else {
-                output = output + " in Raum ";
-                output = output + myList.get(2);
+            if (myList.get(3) == "null") {
+                output = output + "[Lehrer]";
+            } else {
+                output = output + getColoredSpanned(myList.get(3), "ff0000");
             }
-        } else {
-            output = output + " in Raum ";
-            output = output + getColoredSpanned(myList.get(5), "ff0000");
+
+
+            if (myList.get(5) == "null") {
+                if (myList.get(2).equals("null"))
+                    output = output + " in [Raum]";
+                else {
+                    output = output + " in Raum ";
+                    output = output + myList.get(2);
+                }
+            } else {
+                output = output + " in Raum ";
+                output = output + getColoredSpanned(myList.get(5), "ff0000");
+            }
         }
 
         if (myList.get(6).contains("verschoben")) {
