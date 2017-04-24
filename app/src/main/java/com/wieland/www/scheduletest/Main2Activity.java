@@ -185,6 +185,8 @@ public class Main2Activity extends AppCompatActivity
     private void setText(Document doc, int index) {
         ArrayList<String> willBeSet = new ArrayList<>();
 
+        ArrayList<ArrayList<String>> listInList = new ArrayList<>();
+
         myList.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         myList.setLayoutManager(layoutManager);
@@ -192,7 +194,11 @@ public class Main2Activity extends AppCompatActivity
         ScheduleHandler myHandler = new ScheduleHandler(doc);
         willBeSet = myHandler.getClassList();
 
-        Layout_Row adapter = new Layout_Row(willBeSet, doc, this);
+        for (int i = 0; i < willBeSet.size(); i++) {
+            listInList.add(myHandler.getClassInfo(willBeSet.get(i)));
+        }
+
+        Layout_Row adapter = new Layout_Row(willBeSet, listInList, this);
         myList.setAdapter(adapter);
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);

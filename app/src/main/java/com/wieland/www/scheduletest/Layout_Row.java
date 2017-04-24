@@ -26,12 +26,12 @@ public class Layout_Row extends RecyclerView.Adapter<Layout_Row.Layout_Holder> {
 
     private List<String> listData;
     private LayoutInflater inflater;
-    private Document doc;
+    private ArrayList<ArrayList<String>> list;
 
-    public Layout_Row(List<String> listData, Document doc, Context context) {
+    public Layout_Row(List<String> listData, ArrayList<ArrayList<String>> list, Context context) {
         this.inflater = LayoutInflater.from(context);
         this.listData = listData;
-        this.doc = doc;
+        this.list = list;
     }
 
     @Override
@@ -43,8 +43,8 @@ public class Layout_Row extends RecyclerView.Adapter<Layout_Row.Layout_Holder> {
     @Override
     public void onBindViewHolder(Layout_Holder holder, int position) {
         String item = listData.get(position);
-        ScheduleHandler myNewHandler = new ScheduleHandler(this.doc);
-        ArrayList<String> rowrowList = myNewHandler.getClassInfo(item);
+        //ScheduleHandler myNewHandler = new ScheduleHandler(this.doc);
+        ArrayList<String> rowrowList = this.list.get(position);
 
         
         
