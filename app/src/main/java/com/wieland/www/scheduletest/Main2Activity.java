@@ -182,6 +182,7 @@ public class Main2Activity extends AppCompatActivity
         return true;
     }
 
+
     private void setText(Document doc, int index) {
         ArrayList<String> willBeSet = new ArrayList<>();
 
@@ -240,8 +241,7 @@ public class Main2Activity extends AppCompatActivity
 
     @Override
     public void onRefresh() {
-        SwipeRefresh.animate();
-        SwipeRefresh.setRefreshing(true);
+        //SwipeRefresh.
         int OneOrTwo = 1;
 
         if (TodaySelected)  //so that the right page will be updated, before when swiping down only the first page was being loaded

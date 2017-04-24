@@ -42,6 +42,7 @@ public class ScheduleHandler {
         return outputList;
     }
 
+
     /**
      * @param thisClass needed to figure out weather the line specified up is still relevant for the class
      * @return a single String with all the information from a specific row in the table
