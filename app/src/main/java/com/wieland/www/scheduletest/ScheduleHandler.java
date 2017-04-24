@@ -43,18 +43,16 @@ public class ScheduleHandler {
     }
 
     /**
-     *
-     * @param linePosition the current position in all the rows of a class
      * @param thisClass needed to figure out weather the line specified up is still relevant for the class
      * @return a single String with all the information from a specific row in the table
      */
-    public String getLine(int linePosition, String thisClass) {
+    public ArrayList<String> getClassInfo(String thisClass) {
         myList.clear();
 
         boolean take = false;
         boolean inClass = false;
-        boolean forInfo = true;
 
+        boolean forInfo = true;
         for (org.jsoup.nodes.Element table : doc.select("table")) {
             for (org.jsoup.nodes.Element row : table.select("tr")) {
                 Elements tds = row.select("td");
@@ -69,7 +67,7 @@ public class ScheduleHandler {
                 }
 
                 if(take) {
-                    for(int i = 1; i <= 7; i++) { //TODO: implement the info
+                    for(int i = 1; i <= 7; i++) {
                         if (tds.get(i).text().equals("\u00a0")) {
                             myList.add("null");
                         } else {
@@ -83,91 +81,101 @@ public class ScheduleHandler {
         if (myList.isEmpty())
             return null;
 
-        for (int i = 0; i < linePosition * 7; i++) {
-            myList.remove(0);
-        }
+        int linePositon = 0;
 
-        if(myList.size() < 6)
-            return null;
+        ArrayList<String> outList = new ArrayList<>();
 
-        String output = "";
-        if(myList.get(0).equals("null"))
-            output = "\u0009\u0009\u0009";
-        else if(myList.get(0).contains("10"))
-            output = myList.get(0) + ".\u0009";
-        else
-            output = myList.get(0) + ".\u0009\u0009";
+        while (true) {
+            String output = "";
 
-        if (myList.get(6).contains("ganze Klasse")) {
-            output = output + "Ganze Klasse ";
-        }
+            try {
+                if (myList.size() < 6)
+                    return null;
 
-        if (myList.get(4) == "null") {
-            if(myList.get(1).equals("null"))
-                output = output + "[Fach]";
-            else
-                output = output + myList.get(1);
-        } else {
-            output = output + myList.get(4);
-        }
+                if (myList.get(0 + linePositon).equals("null"))
+                    output = "\u0009\u0009\u0009";
+                else if (myList.get(0 + linePositon).contains("10"))
+                    output = myList.get(0 + linePositon) + ".\u0009";
+                else
+                    output = myList.get(0 + linePositon) + ".\u0009\u0009";
 
-        if (myList.get(3).contains("*Frei")) {
-            output = output + " entfällt";
-            forInfo = false;
-        } else if (myList.get(3).contains("Raum�nderung")) {
-            output = output + ": Raumänderung in Raum " + myList.get(5);
-            forInfo = false;
-        } else if (myList.get(3).contains("*Stillarbeit")) {
-            //if (myList.get(3) == "null")  //TODO: Stillarbeit Teacher
-            if (myList.get(2).equals("null"))
-                output = output + ": Stillarbeit";
-            else
-                output = output + "Stillarbeit in Raum " + myList.get(2);
-            forInfo = false;
-        }
-
-
-        if (forInfo) {
-            output = output + " bei ";
-
-            if (myList.get(3) == "null") {
-                output = output + "[Lehrer]";
-            } else {
-                output = output + getColoredSpanned(myList.get(3), "ff0000");
-            }
-
-
-            if (myList.get(5) == "null") {
-                if (myList.get(2).equals("null"))
-                    output = output + " in [Raum]";
-                else {
-                    output = output + " in Raum ";
-                    output = output + myList.get(2);
+                if (myList.get(6 + linePositon).contains("ganze Klasse")) {
+                    output = output + "Ganze Klasse ";
                 }
-            } else {
-                output = output + " in Raum ";
-                output = output + getColoredSpanned(myList.get(5), "ff0000");
+
+                if (myList.get(4 + linePositon) == "null") {
+                    if (myList.get(1 + linePositon).equals("null"))
+                        output = output + "[Fach]";
+                    else
+                        output = output + myList.get(1 + linePositon);
+                } else {
+                    output = output + myList.get(4 + linePositon);
+                }
+
+                if (myList.get(3 + linePositon).contains("*Frei")) {
+                    output = output + " entfällt";
+                    forInfo = false;
+                } else if (myList.get(3 + linePositon).contains("Raum�nderung")) {
+                    output = output + ": Raumänderung in Raum " + myList.get(5 + linePositon);
+                    forInfo = false;
+                } else if (myList.get(3 + linePositon).contains("*Stillarbeit")) {
+                    //if (myList.get(3) == "null")  //TODO: Stillarbeit Teacher
+                    if (myList.get(2 + linePositon).equals("null"))
+                        output = output + ": Stillarbeit";
+                    else
+                        output = output + "Stillarbeit in Raum " + myList.get(2 + linePositon);
+                    forInfo = false;
+                }
+
+
+                if (forInfo) {
+                    output = output + " bei ";
+
+                    if (myList.get(3 + linePositon) == "null") {
+                        output = output + "[Lehrer]";
+                    } else {
+                        output = output + getColoredSpanned(myList.get(3 + linePositon), "ff0000");
+                    }
+
+
+                    if (myList.get(5 + linePositon) == "null") {
+                        if (myList.get(2 + linePositon).equals("null"))
+                            output = output + " in [Raum]";
+                        else {
+                            output = output + " in Raum ";
+                            output = output + myList.get(2 + linePositon);
+                        }
+                    } else {
+                        output = output + " in Raum ";
+                        output = output + getColoredSpanned(myList.get(5 + linePositon), "ff0000");
+                    }
+                }
+
+                int six = 6 + linePositon;
+
+                if (myList.get(six).contains("verschoben")) {
+                    output = myList.get(linePositon) + ".\u0009\u0009" + myList.get(1) + " wird " + myList.get(six);  //[Fach] wird [verschoben auf Datum]
+                } else if (myList.get(six).contains("anstatt")) {
+                    output = output + " " + myList.get(6);
+                } else if (myList.get(six).contains("Aufg. erteilt")) {
+                    output = output + "; Aufgaben erteilt";
+                } else if (myList.get(six).contains("Aufg. f�r zu Hause erteilt")) {
+                    output = output + "; Aufgaben für Zuhause erteilt";
+                } else if (myList.get(six).contains("Aufg. f�r Stillarbeit erteilt")) {
+                    output = output + "; Aufgaben für Stillarbeit erteilt";
+                } else if (myList.get(six).contains("ganze Klasse")) {
+                } else if (myList.get(six) != "null") {
+                    output = output + "; " + myList.get(six);
+                }
+            } catch (Exception e) {
+                break;
             }
+
+            outList.add(output);
+            linePositon = linePositon + 7;
         }
 
-        if (myList.get(6).contains("verschoben")) {
-            output = myList.get(0) + ".\u0009\u0009" + myList.get(1) + " wird " + myList.get(6);  //[Fach] wird [verschoben auf Datum]
-        } else if (myList.get(6).contains("anstatt")) {
-            output = output + " " + myList.get(6);
-        } else if (myList.get(6).contains("Aufg. erteilt")) {
-            output = output + "; Aufgaben erteilt";
-        } else if (myList.get(6).contains("Aufg. f�r zu Hause erteilt")) {
-            output = output + "; Aufgaben für Zuhause erteilt";
-        } else if (myList.get(6).contains("Aufg. f�r Stillarbeit erteilt")) {
-            output = output + "; Aufgaben für Stillarbeit erteilt";
-        } else if (myList.get(6).contains("ganze Klasse")) {
-        } else if (myList.get(6) != "null") {
-            output = output + "; " + myList.get(6);
-        }
-
-
-
-        return output;
+        return outList;
     }
 
     private String getColoredSpanned(String text, String color) {  //TODO: colored text

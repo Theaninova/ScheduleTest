@@ -44,17 +44,7 @@ public class Layout_Row extends RecyclerView.Adapter<Layout_Row.Layout_Holder> {
     public void onBindViewHolder(Layout_Holder holder, int position) {
         String item = listData.get(position);
         ScheduleHandler myNewHandler = new ScheduleHandler(this.doc);
-        ArrayList<String> rowrowList = new ArrayList<>();
-        boolean theExit = true;
-        int counter = 0;
-        while (theExit) {
-            String z = myNewHandler.getLine(counter, item);
-            if(z == null)
-                theExit = false;
-            else
-                rowrowList.add(z.toString());
-            counter++;
-        }
+        ArrayList<String> rowrowList = myNewHandler.getClassInfo(item);
 
         
         
