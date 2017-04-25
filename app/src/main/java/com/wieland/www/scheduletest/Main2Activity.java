@@ -4,10 +4,13 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -99,7 +102,14 @@ public class Main2Activity extends AppCompatActivity
             }
         }
 
-        this.setText(Schedule.getSchedule(1, getApplicationContext()), 1);
+        final ProgressDialog progress = new ProgressDialog(this);
+        progress.setTitle("Loading");
+        progress.setMessage("Wait while loading...");
+        progress.setCancelable(false);
+        progress.show();
+
+        SetTextTask setText = new SetTextTask(Schedule.getSchedule(1, this), 1, this, progress);
+        setText.execute();
     }
 
     @Override
@@ -148,11 +158,29 @@ public class Main2Activity extends AppCompatActivity
         SharedPreferences preferences = getSharedPreferences("Tralala", MODE_PRIVATE);
 
         if (id == R.id.nav_heute) {
-            this.setText(Schedule.getSchedule(1, getApplicationContext()), 1);
+            final ProgressDialog progress = new ProgressDialog(this);
+            progress.setTitle("Loading");
+            progress.setMessage("Wait while loading...");
+            progress.setCancelable(false);
+            progress.show();
+
+            SetTextTask setText = new SetTextTask(Schedule.getSchedule(1, this), 1, this, progress);
+            setText.execute();
+
+            //progress.dismiss();
             TodaySelected = true;
 
         } else if (id == R.id.nav_morgen) {
-            this.setText(Schedule.getSchedule(2, getApplicationContext()), 2);
+            final ProgressDialog progress = new ProgressDialog(this);
+            progress.setTitle("Loading");
+            progress.setMessage("Wait while loading...");
+            progress.setCancelable(false);
+            progress.show();
+
+            SetTextTask setText = new SetTextTask(Schedule.getSchedule(2, this), 2, this, progress);
+            setText.execute();
+
+            //progress.dismiss();
             TodaySelected = false;
 
         } else if (id == R.id.nav_slideshow) {
@@ -183,60 +211,130 @@ public class Main2Activity extends AppCompatActivity
     }
 
 
-    private void setText(Document doc, int index) {
-        ArrayList<String> willBeSet = new ArrayList<>();
+    public class SetTextTask extends AsyncTask<Void, Void, Boolean> {
 
-        ArrayList<ArrayList<String>> listInList = new ArrayList<>();
+        private final Document doc;
+        private final int index;
+        private final Context context;
+        private Layout_Row adapter;
+        private String putIn1;
+        private String putIn2;
+        private ProgressDialog progress;
 
-        myList.setHasFixedSize(true);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        myList.setLayoutManager(layoutManager);
-
-        ScheduleHandler myHandler = new ScheduleHandler(doc);
-        willBeSet = myHandler.getClassList();
-
-        for (int i = 0; i < willBeSet.size(); i++) {
-            listInList.add(myHandler.getClassInfo(willBeSet.get(i)));
+        SetTextTask (Document doc, int index, Context context, ProgressDialog progress) {
+            this.doc = doc;
+            this.index = index;
+            this.context = context;
+            this.progress = progress;
         }
 
-        Layout_Row adapter = new Layout_Row(willBeSet, listInList, this);
-        myList.setAdapter(adapter);
+        @Override
+        public Boolean doInBackground(Void... params) {
+            ArrayList<String> willBeSet;
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            ArrayList<ArrayList<String>> listInList = new ArrayList<>();
 
-        // get menu from navigationView
-        Menu menu = navigationView.getMenu();
 
-        String putIn = "";
-        if(Schedule.getDate(1, getApplicationContext()).contains("erscheint"))
-            putIn = "Nicht verfügbar.";
-        else
-            putIn = Schedule.getDate(1, getApplicationContext());
 
-        // find MenuItem you want to change
-        MenuItem nav_camara = menu.findItem(R.id.nav_heute);
-        nav_camara.setTitle(putIn);
+            ScheduleHandler myHandler = new ScheduleHandler(doc);
+            willBeSet = myHandler.getClassList();
 
-        if(Schedule.getDate(2, getApplicationContext()).contains("erscheint"))
-            putIn = "Nicht verfügbar.";
-        else
-            putIn = Schedule.getDate(2, getApplicationContext());
+            for (int i = 0; i < willBeSet.size(); i++) {
+                listInList.add(myHandler.getClassInfo(willBeSet.get(i)));
+            }
 
-        MenuItem nav_gallery = menu.findItem(R.id.nav_morgen);
-        nav_gallery.setTitle(putIn);
+            Layout_Row adapter = new Layout_Row(willBeSet, listInList, this.context);
+            this.adapter = adapter;
 
-        // add NavigationItemSelectedListener to check the navigation clicks
-        navigationView.setNavigationItemSelectedListener(this);
 
-        setTitle(Schedule.getDate(index, getApplicationContext()));
 
-        SharedPreferences pref = getApplicationContext().getSharedPreferences("Tralala", MODE_PRIVATE);
 
-        //Header set username, just some cosmetic stuff
-        NavigationView menu2 = (NavigationView) findViewById(R.id.nav_view);
-        View mHeaderView = menu2.getHeaderView(0);
-        TextView username_view = (TextView) mHeaderView.findViewById(R.id.textView_username);
-        username_view.setText(pref.getString("set_username", "[Nutzername]"));
+            String putIn1 = "";
+            if (Schedule.getDate(1, getApplicationContext()).contains("erscheint"))
+                putIn1 = "Nicht verfügbar.";
+            else
+                putIn1 = Schedule.getDate(1, getApplicationContext());
+
+            this.putIn1 = putIn1;
+
+            String putIn2 = "";
+            if (Schedule.getDate(2, getApplicationContext()).contains("erscheint"))
+                putIn2 = "Nicht verfügbar.";
+            else
+                putIn2 = Schedule.getDate(2, getApplicationContext());
+
+            this.putIn2 = putIn2;
+
+
+
+            return true;
+        }
+
+        @Override
+        public void onPostExecute(final Boolean success) {
+            myList.setHasFixedSize(true);
+            LinearLayoutManager layoutManager = new LinearLayoutManager(this.context);
+            myList.setLayoutManager(layoutManager);
+            myList.setAdapter(this.adapter);
+
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+
+            // get menu from navigationView
+            Menu menu = navigationView.getMenu();
+
+            // find MenuItem you want to change
+            MenuItem nav_camara = menu.findItem(R.id.nav_heute);
+            nav_camara.setTitle(this.putIn1);
+
+            MenuItem nav_gallery = menu.findItem(R.id.nav_morgen);
+            nav_gallery.setTitle(this.putIn2);
+
+            // add NavigationItemSelectedListener to check the navigation clicks
+            //navigationView.setNavigationItemSelectedListener(this.context);
+
+            SharedPreferences pref = getApplicationContext().getSharedPreferences("Tralala", MODE_PRIVATE);
+
+            //Header set username, just some cosmetic stuff
+            NavigationView menu2 = (NavigationView) findViewById(R.id.nav_view);
+            View mHeaderView = menu2.getHeaderView(0);
+            TextView username_view = (TextView) mHeaderView.findViewById(R.id.textView_username);
+            username_view.setText(pref.getString("set_username", "[Nutzername]"));
+
+            setTitle(Schedule.getDate(this.index, this.context));
+            progress.dismiss();
+            SwipeRefresh.setRefreshing(false);
+        }
+    }
+
+    public class Refresh extends AsyncTask<Void, Void, Boolean> {
+        private final Context context;
+        private IOException e;
+
+        Refresh(Context context) {
+            this.context = context;
+        }
+
+        public Boolean doInBackground(Void... params) {
+            try {
+                Schedule.refresh(context);
+                return true;
+            } catch (IOException e) {
+                this.e = e;
+                return false;
+            }
+        }
+
+        public void onPostExecute(final Boolean success) {
+            if (!success) {
+                if (e.getMessage() == "HTTP error fetching URL") {
+                    Intent intent = new Intent(this.context, LoginActivity.class);
+                    startActivity(intent);
+                } else {
+                    Toast toast = Toast.makeText(this.context, "Keine Verbindung möglich.", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            }
+        }
     }
 
     @Override
@@ -249,20 +347,16 @@ public class Main2Activity extends AppCompatActivity
         else
             OneOrTwo = 2;
 
-        try {
-            Schedule.refresh(getApplicationContext());
-            SwipeRefresh.setRefreshing(false);
-        } catch (IOException e) {
-            SwipeRefresh.setRefreshing(false);
-            if (e.getMessage() == "HTTP error fetching URL") {
-                Intent intent = new Intent(this, LoginActivity.class);
-                startActivity(intent);
-            } else {
-                Toast toast = Toast.makeText(getApplicationContext(), "Keine Verbindung möglich.", Toast.LENGTH_SHORT);
-                toast.show();
-            }
-        }
+        Refresh refresh = new Refresh(this);
+        refresh.execute();
 
-        this.setText(Schedule.getSchedule(OneOrTwo, getApplicationContext()), OneOrTwo);
+        final ProgressDialog progress = new ProgressDialog(this);
+        progress.setTitle("Loading");
+        progress.setMessage("Wait while loading...");
+        progress.setCancelable(false);
+        //progress.show();
+
+        SetTextTask setText = new SetTextTask(Schedule.getSchedule(OneOrTwo, getApplicationContext()), OneOrTwo, this, progress);
+        setText.execute();
     }
 }
