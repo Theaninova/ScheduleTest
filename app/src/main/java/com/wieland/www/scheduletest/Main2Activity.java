@@ -103,8 +103,8 @@ public class Main2Activity extends AppCompatActivity
         }
 
         final ProgressDialog progress = new ProgressDialog(this);
-        progress.setTitle("Loading");
-        progress.setMessage("Wait while loading...");
+        progress.setTitle("Laden");
+        progress.setMessage("Plan wird ausgelesen...");
         progress.setCancelable(false);
         progress.show();
 
@@ -159,8 +159,8 @@ public class Main2Activity extends AppCompatActivity
 
         if (id == R.id.nav_heute) {
             final ProgressDialog progress = new ProgressDialog(this);
-            progress.setTitle("Loading");
-            progress.setMessage("Wait while loading...");
+            progress.setTitle("Laden");
+            progress.setMessage("Plan wird ausgelesen...");
             progress.setCancelable(false);
             progress.show();
 
@@ -172,8 +172,8 @@ public class Main2Activity extends AppCompatActivity
 
         } else if (id == R.id.nav_morgen) {
             final ProgressDialog progress = new ProgressDialog(this);
-            progress.setTitle("Loading");
-            progress.setMessage("Wait while loading...");
+            progress.setTitle("Laden");
+            progress.setMessage("Plan wird ausgelesen...");
             progress.setCancelable(false);
             progress.show();
 
@@ -351,8 +351,8 @@ public class Main2Activity extends AppCompatActivity
         refresh.execute();
 
         final ProgressDialog progress = new ProgressDialog(this);
-        progress.setTitle("Loading");
-        progress.setMessage("Wait while loading...");
+        progress.setTitle("Laden");
+        progress.setMessage("Plan wird ausgelesen...");
         progress.setCancelable(false);
         //progress.show();
 
