@@ -27,6 +27,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
+import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,6 +65,8 @@ public class Main2Activity extends AppCompatActivity
         SwipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
 
         myList = (RecyclerView) findViewById(R.id.theListOfDoom);
+
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -277,6 +285,8 @@ public class Main2Activity extends AppCompatActivity
             myList.setLayoutManager(layoutManager);
             myList.setAdapter(this.adapter);
 
+
+
             NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 
             // get menu from navigationView
@@ -339,7 +349,10 @@ public class Main2Activity extends AppCompatActivity
 
     @Override
     public void onRefresh() {
-        //SwipeRefresh.
+
+        Document compare1 = Schedule.getSchedule(1, this);
+        Document compare2 = Schedule.getSchedule(2, this);
+
         int OneOrTwo = 1;
 
         if (TodaySelected)  //so that the right page will be updated, before when swiping down only the first page was being loaded
@@ -350,13 +363,20 @@ public class Main2Activity extends AppCompatActivity
         Refresh refresh = new Refresh(this);
         refresh.execute();
 
-        final ProgressDialog progress = new ProgressDialog(this);
-        progress.setTitle("Laden");
-        progress.setMessage("Plan wird ausgelesen...");
-        progress.setCancelable(false);
-        //progress.show();
+        if (compare1 == Schedule.getSchedule(1, this) && compare2 == Schedule.getSchedule(2, this)) {
 
-        SetTextTask setText = new SetTextTask(Schedule.getSchedule(OneOrTwo, getApplicationContext()), OneOrTwo, this, progress);
-        setText.execute();
+            final ProgressDialog progress = new ProgressDialog(this);
+            progress.setTitle("Laden");
+            progress.setMessage("Plan wird ausgelesen...");
+            progress.setCancelable(false);
+            //progress.show();
+
+            SetTextTask setText = new SetTextTask(Schedule.getSchedule(OneOrTwo, getApplicationContext()), OneOrTwo, this, progress);
+            setText.execute();
+        } else {
+            SwipeRefresh.setRefreshing(false);
+            Toast toast = Toast.makeText(this, "Plan ist bereits aktuell.", Toast.LENGTH_SHORT);
+            toast.show();
+        }
     }
 }

@@ -4,9 +4,12 @@ import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -27,11 +30,13 @@ public class Layout_Row extends RecyclerView.Adapter<Layout_Row.Layout_Holder> {
     private List<String> listData;
     private LayoutInflater inflater;
     private ArrayList<ArrayList<String>> list;
+    private Context context;
 
     public Layout_Row(List<String> listData, ArrayList<ArrayList<String>> list, Context context) {
         this.inflater = LayoutInflater.from(context);
         this.listData = listData;
         this.list = list;
+        this.context = context;
     }
 
     @Override
@@ -46,12 +51,12 @@ public class Layout_Row extends RecyclerView.Adapter<Layout_Row.Layout_Holder> {
         //ScheduleHandler myNewHandler = new ScheduleHandler(this.doc);
         ArrayList<String> rowrowList = this.list.get(position);
 
+        ActivityRowNew adapter = new ActivityRowNew(holder.itemView.getContext(), rowrowList);
         
-        
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(holder.itemView.getContext(),
+        /*ArrayAdapter<String> adapter = new ArrayAdapter<String>(holder.itemView.getContext(),
                 android.R.layout.simple_list_item_1,
                 android.R.id.text1,
-                rowrowList);
+                rowrowList);*/
 
         holder.recyclerView.setEnabled(false);
 
@@ -59,6 +64,8 @@ public class Layout_Row extends RecyclerView.Adapter<Layout_Row.Layout_Holder> {
         holder.recyclerView.setAdapter(adapter);
 
         setListViewHeightBasedOnItems(holder.recyclerView);
+
+        runEnterAnimation(holder.itemView);
     }
 
     @Override
@@ -77,6 +84,18 @@ public class Layout_Row extends RecyclerView.Adapter<Layout_Row.Layout_Holder> {
             title = (TextView) itemView.findViewById(R.id.textTitleRow);
             recyclerView = (ListView) itemView.findViewById(R.id.innerList);
         }
+    }
+
+    private void runEnterAnimation(View view) {
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+
+        view.setTranslationY(display.getHeight());
+        view.animate()
+                .translationY(0)
+                .setInterpolator(new DecelerateInterpolator(3.f))
+                .setDuration(700)
+                .start();
     }
 
     public static boolean setListViewHeightBasedOnItems(ListView listView) {

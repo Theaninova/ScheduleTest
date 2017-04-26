@@ -94,11 +94,11 @@ public class ScheduleHandler {
                     return null;
 
                 if (myList.get(0 + linePositon).equals("null"))
-                    output = "\u0009\u0009\u0009";
+                    output = "   ";
                 else if (myList.get(0 + linePositon).contains("10"))
-                    output = myList.get(0 + linePositon) + ".\u0009";
+                    output = myList.get(0 + linePositon) + ".";
                 else
-                    output = myList.get(0 + linePositon) + ".\u0009\u0009";
+                    output = myList.get(0 + linePositon) + ". ";
 
                 if (myList.get(6 + linePositon).contains("ganze Klasse")) {
                     output = output + "Ganze Klasse ";
@@ -155,7 +155,7 @@ public class ScheduleHandler {
                 int six = 6 + linePositon;
 
                 if (myList.get(six).contains("verschoben")) {
-                    output = myList.get(linePositon) + ".\u0009\u0009" + myList.get(1) + " wird " + myList.get(six);  //[Fach] wird [verschoben auf Datum]
+                    output = myList.get(linePositon) + ". " + myList.get(1) + " wird " + myList.get(six);  //[Fach] wird [verschoben auf Datum]
                 } else if (myList.get(six).contains("anstatt")) {
                     output = output + " " + myList.get(6);
                 } else if (myList.get(six).contains("Aufg. erteilt")) {
