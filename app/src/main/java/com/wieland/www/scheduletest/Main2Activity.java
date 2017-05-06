@@ -365,7 +365,7 @@ public class Main2Activity extends AppCompatActivity
         Refresh refresh = new Refresh(this);
         refresh.execute();
 
-        if (compare1 == Schedule.getSchedule(1, this) && compare2 == Schedule.getSchedule(2, this)) {
+        if (compare1.toString() == Schedule.getSchedule(1, this).toString() && compare2.toString() == Schedule.getSchedule(2, this).toString()) {
 
             final ProgressDialog progress = new ProgressDialog(this);
             progress.setTitle("Laden");
@@ -377,8 +377,16 @@ public class Main2Activity extends AppCompatActivity
             setText.execute();
         } else {
             SwipeRefresh.setRefreshing(false);
-            Toast toast = Toast.makeText(this, "Plan ist bereits aktuell.", Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(this, "Plan ist bereits aktuell (nicht sicher).", Toast.LENGTH_SHORT);
             toast.show();
+
+            final ProgressDialog progress = new ProgressDialog(this);
+            progress.setTitle("Laden");
+            progress.setMessage("Plan wird ausgelesen...");
+            progress.setCancelable(false);
+
+            SetTextTask setText = new SetTextTask(Schedule.getSchedule(OneOrTwo, getApplicationContext()), OneOrTwo, this, progress);
+            setText.execute();
         }
     }
 }
