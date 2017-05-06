@@ -38,4 +38,6 @@
 
     <string name="nutzungsbedigungen_url">http://www.romain-rolland-oberschule.de/app/docs/nutzungsbedingungen.html</string>
     <string name="title_activity_settings">Einstellungen</string>
+
+    <integer name="swing_anim_time">750</integer>
 </resources>

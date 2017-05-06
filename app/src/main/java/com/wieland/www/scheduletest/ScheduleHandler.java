@@ -47,13 +47,14 @@ public class ScheduleHandler {
      * @param thisClass needed to figure out weather the line specified up is still relevant for the class
      * @return a single String with all the information from a specific row in the table
      */
-    public ArrayList<String> getClassInfo(String thisClass) {
+    public ArrayList<android.text.Spanned> getClassInfo(String thisClass) {
         myList.clear();
 
         boolean take = false;
         boolean inClass = false;
 
         boolean forInfo = true;
+
         for (org.jsoup.nodes.Element table : doc.select("table")) {
             for (org.jsoup.nodes.Element row : table.select("tr")) {
                 Elements tds = row.select("td");
@@ -84,9 +85,10 @@ public class ScheduleHandler {
 
         int linePositon = 0;
 
-        ArrayList<String> outList = new ArrayList<>();
+        ArrayList<android.text.Spanned> outList = new ArrayList<>();
 
         while (true) {
+            forInfo = true;
             String output = "";
 
             try {
@@ -94,11 +96,11 @@ public class ScheduleHandler {
                     return null;
 
                 if (myList.get(0 + linePositon).equals("null"))
-                    output = "   ";
+                    output = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                 else if (myList.get(0 + linePositon).contains("10"))
-                    output = myList.get(0 + linePositon) + ".";
+                    output = myList.get(0 + linePositon) + ".&nbsp;";
                 else
-                    output = myList.get(0 + linePositon) + ". ";
+                    output = myList.get(0 + linePositon) + ".&nbsp;&nbsp;";
 
                 if (myList.get(6 + linePositon).contains("ganze Klasse")) {
                     output = output + "Ganze Klasse ";
@@ -106,23 +108,23 @@ public class ScheduleHandler {
 
                 if (myList.get(4 + linePositon) == "null") {
                     if (myList.get(1 + linePositon).equals("null"))
-                        output = output + "[Fach]";
+                        output = output + getColoredSpanned("[Fach]", "grey");
                     else
-                        output = output + myList.get(1 + linePositon);
+                        output = output + getColoredSpanned(myList.get(1 + linePositon), "#008000");
                 } else {
-                    output = output + myList.get(4 + linePositon);
+                    output = output + getColoredSpanned(myList.get(4 + linePositon), "#8B0000");
                 }
 
                 if (myList.get(3 + linePositon).contains("*Frei")) {
                     output = output + " entfällt";
                     forInfo = false;
                 } else if (myList.get(3 + linePositon).contains("Raum�nderung")) {
-                    output = output + ": Raumänderung in Raum " + myList.get(5 + linePositon);
+                    output = output + ": Raumänderung in Raum " + getColoredSpanned(myList.get(5 + linePositon), "#8B0000");
                     forInfo = false;
                 } else if (myList.get(3 + linePositon).contains("*Stillarbeit")) {
                     //if (myList.get(3) == "null")  //TODO: Stillarbeit Teacher
                     if (myList.get(2 + linePositon).equals("null"))
-                        output = output + ": Stillarbeit";
+                        output = output + ": " + getColoredSpanned("Stillarbeit", "#8B0000");
                     else
                         output = output + "Stillarbeit in Raum " + myList.get(2 + linePositon);
                     forInfo = false;
@@ -133,46 +135,45 @@ public class ScheduleHandler {
                     output = output + " bei ";
 
                     if (myList.get(3 + linePositon) == "null") {
-                        output = output + "[Lehrer]";
+                        output = output + getColoredSpanned("[Lehrer]", "grey");
                     } else {
-                        output = output + getColoredSpanned(myList.get(3 + linePositon), "ff0000");
+                        output = output + getColoredSpanned(myList.get(3 + linePositon), "#8B0000");
                     }
 
 
                     if (myList.get(5 + linePositon) == "null") {
-                        if (myList.get(2 + linePositon).equals("null"))
-                            output = output + " in [Raum]";
+                        if (myList.get(2 + linePositon) == "null")
+                            output = output + " in " + getColoredSpanned("[Raum]", "grey");
                         else {
-                            output = output + " in Raum ";
-                            output = output + myList.get(2 + linePositon);
+                            output = output + " in Raum " + getColoredSpanned(myList.get(2 + linePositon), "#008000");
                         }
                     } else {
                         output = output + " in Raum ";
-                        output = output + getColoredSpanned(myList.get(5 + linePositon), "ff0000");
+                        output = output + getColoredSpanned(myList.get(5 + linePositon), "#8B0000");
                     }
                 }
 
                 int six = 6 + linePositon;
 
                 if (myList.get(six).contains("verschoben")) {
-                    output = myList.get(linePositon) + ". " + myList.get(1) + " wird " + myList.get(six);  //[Fach] wird [verschoben auf Datum]
+                    output = myList.get(linePositon) + ".&nbsp;&nbsp;" + getColoredSpanned(myList.get(1 + linePositon), "#008000") + " wird " + getColoredSpanned(myList.get(six), "#8B0000");  //[Fach] wird [verschoben auf Datum]
                 } else if (myList.get(six).contains("anstatt")) {
-                    output = output + " " + myList.get(6);
+                    output = output + " " + myList.get(6 + linePositon);
                 } else if (myList.get(six).contains("Aufg. erteilt")) {
-                    output = output + "; Aufgaben erteilt";
+                    output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned("Aufgaben erteilt", "grey");
                 } else if (myList.get(six).contains("Aufg. f�r zu Hause erteilt")) {
-                    output = output + "; Aufgaben für Zuhause erteilt";
+                    output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned("Aufgaben für Zuhause erteilt", "grey");
                 } else if (myList.get(six).contains("Aufg. f�r Stillarbeit erteilt")) {
-                    output = output + "; Aufgaben für Stillarbeit erteilt";
+                    output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned("Aufgaben für Stillarbeit erteilt", "grey");
                 } else if (myList.get(six).contains("ganze Klasse")) {
                 } else if (myList.get(six) != "null") {
-                    output = output + "; " + myList.get(six);
+                    output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned(myList.get(six), "grey");
                 }
             } catch (Exception e) {
                 break;
             }
 
-            outList.add(output);
+            outList.add(Html.fromHtml(output));
             linePositon = linePositon + 7;
         }
 
@@ -180,7 +181,7 @@ public class ScheduleHandler {
     }
 
     private String getColoredSpanned(String text, String color) {  //TODO: colored text
-        //String input = "<font color=" + color + ">" + text + "</font>";
-        return text;
+        String input = "<font color=" + color + ">" + text + "</font>";
+        return input;
     }
 }

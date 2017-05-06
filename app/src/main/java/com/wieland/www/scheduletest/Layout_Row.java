@@ -29,10 +29,10 @@ public class Layout_Row extends RecyclerView.Adapter<Layout_Row.Layout_Holder> {
 
     private List<String> listData;
     private LayoutInflater inflater;
-    private ArrayList<ArrayList<String>> list;
+    private ArrayList<ArrayList<android.text.Spanned>> list;
     private Context context;
 
-    public Layout_Row(List<String> listData, ArrayList<ArrayList<String>> list, Context context) {
+    public Layout_Row(List<String> listData, ArrayList<ArrayList<android.text.Spanned>> list, Context context) {
         this.inflater = LayoutInflater.from(context);
         this.listData = listData;
         this.list = list;
@@ -49,14 +49,14 @@ public class Layout_Row extends RecyclerView.Adapter<Layout_Row.Layout_Holder> {
     public void onBindViewHolder(Layout_Holder holder, int position) {
         String item = listData.get(position);
         //ScheduleHandler myNewHandler = new ScheduleHandler(this.doc);
-        ArrayList<String> rowrowList = this.list.get(position);
+        ArrayList<android.text.Spanned> rowrowList = this.list.get(position);
 
-        ActivityRowNew adapter = new ActivityRowNew(holder.itemView.getContext(), rowrowList);
+        //ActivityRowNew adapter = new ActivityRowNew(holder.itemView.getContext(), rowrowList);
         
-        /*ArrayAdapter<String> adapter = new ArrayAdapter<String>(holder.itemView.getContext(),
+        ArrayAdapter<android.text.Spanned> adapter = new ArrayAdapter<android.text.Spanned>(holder.itemView.getContext(),
                 android.R.layout.simple_list_item_1,
                 android.R.id.text1,
-                rowrowList);*/
+                rowrowList);
 
         holder.recyclerView.setEnabled(false);
 
@@ -65,7 +65,7 @@ public class Layout_Row extends RecyclerView.Adapter<Layout_Row.Layout_Holder> {
 
         setListViewHeightBasedOnItems(holder.recyclerView);
 
-        runEnterAnimation(holder.itemView);
+        //runEnterAnimation(holder.itemView);
     }
 
     @Override

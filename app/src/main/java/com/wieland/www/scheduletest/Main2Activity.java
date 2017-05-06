@@ -240,7 +240,7 @@ public class Main2Activity extends AppCompatActivity
         public Boolean doInBackground(Void... params) {
             ArrayList<String> willBeSet;
 
-            ArrayList<ArrayList<String>> listInList = new ArrayList<>();
+            ArrayList<ArrayList<android.text.Spanned>> listInList = new ArrayList<>();
 
 
 
@@ -283,7 +283,9 @@ public class Main2Activity extends AppCompatActivity
             myList.setHasFixedSize(true);
             LinearLayoutManager layoutManager = new LinearLayoutManager(this.context);
             myList.setLayoutManager(layoutManager);
+
             myList.setAdapter(this.adapter);
+            //myList.startAnimation(animation);
 
 
 
