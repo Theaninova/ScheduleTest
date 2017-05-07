@@ -102,9 +102,9 @@ public class ScheduleHandler {
                 else
                     output = myList.get(0 + linePositon) + ".&nbsp;&nbsp;";
 
-                if (myList.get(6 + linePositon).contains("ganze Klasse")) {
+                /*if (myList.get(6 + linePositon).contains("ganze Klasse")) {
                     output = output + "Ganze Klasse ";
-                }
+                }*/
 
                 if (myList.get(4 + linePositon) == "null") {
                     if (myList.get(1 + linePositon).equals("null"))
@@ -116,7 +116,7 @@ public class ScheduleHandler {
                 }
 
                 if (myList.get(3 + linePositon).contains("*Frei")) {
-                    output = output + " entfällt";
+                    output = output + " " + getColoredSpanned("entfällt", "8B0000");
                     forInfo = false;
                 } else if (myList.get(3 + linePositon).contains("Raum�nderung")) {
                     output = output + ": Raumänderung in Raum " + getColoredSpanned(myList.get(5 + linePositon), "#8B0000");
@@ -126,7 +126,7 @@ public class ScheduleHandler {
                     if (myList.get(2 + linePositon).equals("null"))
                         output = output + ": " + getColoredSpanned("Stillarbeit", "#8B0000");
                     else
-                        output = output + "Stillarbeit in Raum " + myList.get(2 + linePositon);
+                        output = output + ": " + getColoredSpanned("Stillarbeit", "#8B0000") + " in Raum " + getColoredSpanned(myList.get(2 + linePositon), "#008000");
                     forInfo = false;
                 }
 
@@ -165,7 +165,7 @@ public class ScheduleHandler {
                     output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned("Aufgaben für Zuhause erteilt", "grey");
                 } else if (myList.get(six).contains("Aufg. f�r Stillarbeit erteilt")) {
                     output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned("Aufgaben für Stillarbeit erteilt", "grey");
-                } else if (myList.get(six).contains("ganze Klasse")) {
+                //} else if (myList.get(six).contains("ganze Klasse")) {
                 } else if (myList.get(six) != "null") {
                     output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned(myList.get(six), "grey");
                 }

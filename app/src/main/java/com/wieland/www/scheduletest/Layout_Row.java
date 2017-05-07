@@ -62,10 +62,13 @@ public class Layout_Row extends RecyclerView.Adapter<Layout_Row.Layout_Holder> {
 
         holder.title.setText(item);
         holder.recyclerView.setAdapter(adapter);
+        if(rowrowList.size() == 1) {
+            holder.subtitle.setText(rowrowList.size() + " Eintrag");
+        } else {
+            holder.subtitle.setText(rowrowList.size() + " Einträge");
+        }
 
         setListViewHeightBasedOnItems(holder.recyclerView);
-
-        //runEnterAnimation(holder.itemView);
     }
 
     @Override
@@ -76,26 +79,16 @@ public class Layout_Row extends RecyclerView.Adapter<Layout_Row.Layout_Holder> {
     class Layout_Holder extends RecyclerView.ViewHolder {
 
         private TextView title;
+        private TextView subtitle;
         private ListView recyclerView;
 
         public Layout_Holder(View itemView) {
             super(itemView);
 
+            subtitle = (TextView) itemView.findViewById(R.id.textSubtitleRow);
             title = (TextView) itemView.findViewById(R.id.textTitleRow);
             recyclerView = (ListView) itemView.findViewById(R.id.innerList);
         }
-    }
-
-    private void runEnterAnimation(View view) {
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-
-        view.setTranslationY(display.getHeight());
-        view.animate()
-                .translationY(0)
-                .setInterpolator(new DecelerateInterpolator(3.f))
-                .setDuration(700)
-                .start();
     }
 
     public static boolean setListViewHeightBasedOnItems(ListView listView) {
