@@ -11,7 +11,7 @@
     android:paddingLeft="0dp"
     android:paddingRight="0dp"
     android:paddingStart="0dp"
-    android:paddingTop="0dp"
+    android:paddingTop="100dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.wieland.www.scheduletest.Main2Activity"
     tools:showIn="@layout/app_bar_main2">
@@ -58,7 +58,8 @@
             android:paddingRight="0dp"
             android:paddingStart="0dp"
             android:paddingTop="0dp"
-            android:scrollbars="vertical">
+            android:scrollbars="vertical"
+            tools:listitem="@layout/layout_row">
 
         </android.support.v7.widget.RecyclerView>
 

@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabItem;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -29,13 +31,18 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class Tab1 extends Fragment {
 
+    SwipeRefreshLayout SwipeRefresh;
+    RecyclerView myList;
+    Context context;
+
+    int index = 1;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.content_main2, container, false);
     }
 
-    SwipeRefreshLayout SwipeRefresh;
-    RecyclerView myList;
+
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -43,14 +50,16 @@ public class Tab1 extends Fragment {
 
         SwipeRefresh = (SwipeRefreshLayout) getActivity().findViewById(R.id.swiperefresh);
         myList = (RecyclerView) getActivity().findViewById(R.id.theListOfDoom);
-        final ProgressDialog progress = new ProgressDialog(getActivity());
-        progress.setTitle("Laden");
-        progress.setMessage("Plan wird ausgelesen...");
-        progress.setCancelable(false);
 
-        SetTextTask setText = new SetTextTask(Schedule.getSchedule(1, getActivity()), 1, getActivity(), progress);
+        context = getActivity();
+        SetTextTask setText = new SetTextTask(Schedule.getSchedule(index, context), index, context);
         setText.execute();
     }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
 
     public class SetTextTask extends AsyncTask<Void, Void, Boolean> {
 
@@ -60,13 +69,11 @@ public class Tab1 extends Fragment {
         private Layout_Row adapter;
         private String putIn1;
         private String putIn2;
-        private ProgressDialog progress;
 
-        SetTextTask (Document doc, int index, Context context, ProgressDialog progress) {
+        SetTextTask (Document doc, int index, Context context) {
             this.doc = doc;
             this.index = index;
             this.context = context;
-            this.progress = progress;
         }
 
         @Override
@@ -106,8 +113,6 @@ public class Tab1 extends Fragment {
 
             this.putIn2 = putIn2;
 
-
-
             return true;
         }
 
@@ -116,26 +121,7 @@ public class Tab1 extends Fragment {
             myList.setHasFixedSize(true);
             LinearLayoutManager layoutManager = new LinearLayoutManager(this.context);
             myList.setLayoutManager(layoutManager);
-
             myList.setAdapter(this.adapter);
-            //myList.startAnimation(animation);
-
-
-
-            NavigationView navigationView = (NavigationView) getActivity().findViewById(R.id.nav_view);
-
-            // get menu from navigationView
-            Menu menu = navigationView.getMenu();
-
-            // find MenuItem you want to change
-            MenuItem nav_camara = menu.findItem(R.id.nav_heute);
-            nav_camara.setTitle(this.putIn1);
-
-            MenuItem nav_gallery = menu.findItem(R.id.nav_morgen);
-            nav_gallery.setTitle(this.putIn2);
-
-            // add NavigationItemSelectedListener to check the navigation clicks
-            //navigationView.setNavigationItemSelectedListener(this.context);
 
             SharedPreferences pref = getActivity().getSharedPreferences("Tralala", MODE_PRIVATE);
 
@@ -146,7 +132,6 @@ public class Tab1 extends Fragment {
             username_view.setText(pref.getString("set_username", "[Nutzername]"));
 
             //setTitle(Schedule.getDate(this.index, this.context));
-            progress.dismiss();
             SwipeRefresh.setRefreshing(false);
         }
     }
