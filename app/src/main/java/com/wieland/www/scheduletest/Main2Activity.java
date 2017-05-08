@@ -12,7 +12,9 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -23,6 +25,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.TabHost;
+import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,8 +45,6 @@ public class Main2Activity extends AppCompatActivity
     SwipeRefreshLayout SwipeRefresh;
     RecyclerView myList;
 
-    MenuItem menu_today;
-
     private boolean TodaySelected = true; //for Swipe to Refresh
 
     @Override
@@ -55,14 +59,43 @@ public class Main2Activity extends AppCompatActivity
 
         myList = (RecyclerView) findViewById(R.id.theListOfDoom);
 
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        final Context context = this;
+        final ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
+        final PagerAdapter adapter = new PagerAdapter
+                (getSupportFragmentManager(), tabLayout.getTabCount());
+        viewPager.setAdapter(adapter);
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void onTabSelected(TabLayout.Tab tab) {
+                viewPager.setCurrentItem(tab.getPosition());
+                //final ProgressDialog progress = new ProgressDialog(context);
+                //progress.setTitle("Laden");
+                //progress.setMessage("Plan wird ausgelesen...");
+                //progress.setCancelable(false);
+
+                //SetTextTask setText = new SetTextTask(Schedule.getSchedule(tab.getPosition(), context), tab.getPosition(), context, progress);
+                //setText.execute();
+
+                //progress.dismiss();
+                if (tab.getPosition() == 1) {
+                    TodaySelected = true;
+                } else {
+                    TodaySelected = false;
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                onRefresh();
             }
         });
 
@@ -99,14 +132,37 @@ public class Main2Activity extends AppCompatActivity
             }
         }
 
-        final ProgressDialog progress = new ProgressDialog(this);
-        progress.setTitle("Laden");
-        progress.setMessage("Plan wird ausgelesen...");
-        progress.setCancelable(false);
-        progress.show();
+        //final ProgressDialog progress = new ProgressDialog(this);
+        //progress.setTitle("Laden");
+        //progress.setMessage("Plan wird ausgelesen...");
+        //progress.setCancelable(false);
+        //progress.show();
 
-        SetTextTask setText = new SetTextTask(Schedule.getSchedule(1, this), 1, this, progress);
-        setText.execute();
+        //SetTextTask setText = new SetTextTask(Schedule.getSchedule(1, this), 1, this, progress);
+        //setText.execute();
+    }
+
+    public static TabHost createTabHost(Context context) {
+        TabWidget tabWidget = new TabWidget(context);
+        tabWidget.setId(android.R.id.tabs);
+
+        FrameLayout frame = new FrameLayout(context);
+        frame.setId(android.R.id.tabcontent);
+        LinearLayout.LayoutParams frameLayoutParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1);
+        frameLayoutParams.setMargins(4, 4, 4, 4);
+        frame.setLayoutParams(frameLayoutParams);
+
+        LinearLayout tabHostLayout = new LinearLayout(context);
+        tabHostLayout.setOrientation(LinearLayout.VERTICAL);
+        tabHostLayout.addView(tabWidget);
+        tabHostLayout.addView(frame);
+
+        TabHost tabHost = new TabHost(context, null);
+        tabHost.addView(tabHostLayout);
+        tabHost.setup();
+
+        return tabHost;
     }
 
     @Override
