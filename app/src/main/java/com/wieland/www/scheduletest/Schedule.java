@@ -92,4 +92,20 @@ public class Schedule {
 
         return out;
     }
+
+    public static String getUpdateDate(int index, Context context) {
+        SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
+
+        String out;
+        Document doc;
+
+        if (index == 1)
+            doc = Jsoup.parse(pref.getString("Day1", ""));
+        else
+            doc = Jsoup.parse(pref.getString("Day2", ""));
+
+        out = doc.select("h1").text();
+
+        return out;
+    }
 }

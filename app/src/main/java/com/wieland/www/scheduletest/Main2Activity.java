@@ -29,13 +29,17 @@ import android.widget.Toast;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
+import java.sql.Ref;
+import java.util.Objects;
 
 //TODO: wire the OnScrollListener from the ListView manually http://nlopez.io/swiperefreshlayout-with-listview-done-right/
 
 public class Main2Activity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener {
+        implements NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener, Tab1.OnHeadlineSelectedListener, Tab2.OnHeadlineSelectedListener2 {
 
     private PagerAdapter pagerAdapter;
+    private android.support.v4.app.Fragment tab1;
+    private android.support.v4.app.Fragment tab2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +56,8 @@ public class Main2Activity extends AppCompatActivity
         pagerAdapter = new PagerAdapter
                 (getSupportFragmentManager(), tabLayout.getTabCount());
         viewPager.setAdapter(pagerAdapter);
+        this.tab1 = pagerAdapter.getItem(0);
+        this.tab2 = pagerAdapter.getItem(1);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -61,12 +67,10 @@ public class Main2Activity extends AppCompatActivity
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-                //viewPager.setCurrentItem(tab.getPosition());
             }
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-                //viewPager.setCurrentItem(tab.getPosition());
                 onRefresh();
             }
         });
@@ -94,7 +98,7 @@ public class Main2Activity extends AppCompatActivity
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
 
                 alertDialogBuilder.setTitle("Verbindungsfehler");
-                alertDialogBuilder.setMessage("Gespeicherter Plan von " + Schedule.getDate(1, getApplicationContext()) + " und " + Schedule.getDate(2, getApplicationContext()) + " wird geladen.");
+                alertDialogBuilder.setMessage("Gespeicherter Plan von " + Schedule.getDate(1, getApplicationContext()) + " und " + Schedule.getDate(2, getApplicationContext()) + " wird geladen. Der Plan wurde auf der Webseite zuletzt am " + Schedule.getUpdateDate(1, this) + " aktualisiert.");
                 alertDialogBuilder.setCancelable(false);
                 alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -104,29 +108,18 @@ public class Main2Activity extends AppCompatActivity
                 alertDialog.show();
             }
         }
+
+        setTitle(Schedule.getUpdateDate(1, this));
     }
 
-    public static TabHost createTabHost(Context context) {
-        TabWidget tabWidget = new TabWidget(context);
-        tabWidget.setId(android.R.id.tabs);
+    public void onRefreshed() {
+        Refresh refresh = new Refresh(this, Schedule.getUpdateDate(1, this), Schedule.getUpdateDate(2, this));
+        refresh.execute();
+    }
 
-        FrameLayout frame = new FrameLayout(context);
-        frame.setId(android.R.id.tabcontent);
-        LinearLayout.LayoutParams frameLayoutParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1);
-        frameLayoutParams.setMargins(4, 4, 4, 4);
-        frame.setLayoutParams(frameLayoutParams);
-
-        LinearLayout tabHostLayout = new LinearLayout(context);
-        tabHostLayout.setOrientation(LinearLayout.VERTICAL);
-        tabHostLayout.addView(tabWidget);
-        tabHostLayout.addView(frame);
-
-        TabHost tabHost = new TabHost(context, null);
-        tabHost.addView(tabHostLayout);
-        tabHost.setup();
-
-        return tabHost;
+    public void onRefreshed2() {
+        Refresh refresh = new Refresh(this, Schedule.getUpdateDate(1, this), Schedule.getUpdateDate(2, this));
+        refresh.execute();
     }
 
     @Override
@@ -176,10 +169,6 @@ public class Main2Activity extends AppCompatActivity
 
         if (id == R.id.nav_heute) {
 
-
-        } else if (id == R.id.nav_morgen) {
-
-
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_share) {
@@ -210,9 +199,13 @@ public class Main2Activity extends AppCompatActivity
     public class Refresh extends AsyncTask<Void, Void, Boolean> {
         private final Context context;
         private IOException e;
+        private String compare1;
+        private String compare2;
 
-        Refresh(Context context) {
+        Refresh(Context context, String compare1, String compare2) {
             this.context = context;
+            this.compare1 = compare1;
+            this.compare2 = compare2;
         }
 
         public Boolean doInBackground(Void... params) {
@@ -226,6 +219,9 @@ public class Main2Activity extends AppCompatActivity
         }
 
         public void onPostExecute(final Boolean success) {
+            String compare3 = Schedule.getUpdateDate(1, context);
+            String compare4 = Schedule.getUpdateDate(2, context);
+
             if (!success) {
                 if (e.getMessage() == "HTTP error fetching URL") {
                     Intent intent = new Intent(this.context, LoginActivity.class);
@@ -235,35 +231,36 @@ public class Main2Activity extends AppCompatActivity
                     toast.show();
                 }
             }
+            else if(Objects.equals(compare1, compare3) && Objects.equals(compare2, compare4)) {
+                Toast toast = Toast.makeText(context, "Plan ist bereits aktuell: " + Schedule.getUpdateDate(2, context), Toast.LENGTH_LONG);
+                toast.show();
+            } else {
+                Toast toast = Toast.makeText(context, "Neuer Plan geladen: " + Schedule.getUpdateDate(2, context), Toast.LENGTH_LONG);
+                toast.show();
+            }
+
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .detach(tab1)
+                    .attach(tab1)
+                    .commit();
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .detach(tab2)
+                    .attach(tab2)
+                    .commit();
+
+
+            setTitle(Schedule.getUpdateDate(1, context));
         }
     }
 
     @Override
     public void onRefresh() {
+        String compare1 = Schedule.getUpdateDate(1, this);
+        String compare2 = Schedule.getUpdateDate(2, this);
 
-        Document compare1 = Schedule.getSchedule(1, this);
-        Document compare2 = Schedule.getSchedule(2, this);
-
-        Refresh refresh = new Refresh(this);
+        Refresh refresh = new Refresh(this, compare1, compare2);
         refresh.execute();
-
-        if (compare1.toString() == Schedule.getSchedule(1, this).toString() && compare2.toString() == Schedule.getSchedule(2, this).toString()) {
-            Toast toast = Toast.makeText(this, "Plan ist bereits aktuell (nicht sicher).", Toast.LENGTH_SHORT);
-            toast.show();
-            Tab1 tab1 = (Tab1) pagerAdapter.getItem(1);
-            tab1.setIndex(1);
-            //tab1.refreshContent();
-            Tab1 tab2 = (Tab1) pagerAdapter.getItem(2);
-            tab2.setIndex(2);
-            //tab2.refreshContent();
-
-        } else {
-            Tab1 tab1 = (Tab1) pagerAdapter.getItem(1);
-            tab1.setIndex(1);
-            //tab1.refreshContent();
-            Tab1 tab2 = (Tab1) pagerAdapter.getItem(2);
-            tab2.setIndex(2);
-            //tab2.refreshContent();
-        }
     }
 }

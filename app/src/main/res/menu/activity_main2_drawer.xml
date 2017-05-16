@@ -5,11 +5,7 @@
         <item
             android:id="@+id/nav_heute"
             android:icon="@drawable/ic_menu_today"
-            android:title="Heute" />
-        <item
-            android:id="@+id/nav_morgen"
-            android:icon="@drawable/ic_menu_tomorrow"
-            android:title="Morgen" />
+            android:title="Allgemeine Ansicht" />
         <item
             android:id="@+id/nav_slideshow"
             android:icon="@drawable/ic_menu_slideshow"

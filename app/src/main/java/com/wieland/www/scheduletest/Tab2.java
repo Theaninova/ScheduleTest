@@ -1,24 +1,21 @@
 package com.wieland.www.scheduletest;
 
-import android.app.ProgressDialog;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.TabItem;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TabHost;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.jsoup.nodes.Document;
 
@@ -36,6 +33,8 @@ public class Tab2 extends Fragment {
     RecyclerView myList;
     Context context;
 
+    OnHeadlineSelectedListener2 mCallback;
+
     int index = 2;
 
     @Override
@@ -51,10 +50,35 @@ public class Tab2 extends Fragment {
 
         SwipeRefresh = (SwipeRefreshLayout) getActivity().findViewById(R.id.swiperefresh3);
         myList = (RecyclerView) getActivity().findViewById(R.id.theListOfDoom3);
+        SwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mCallback.onRefreshed2();
+            }
+        });
 
         context = getActivity();
         SetTextTask setText = new SetTextTask(Schedule.getSchedule(index, context), index, context);
         setText.execute();
+    }
+
+    // Container Activity must implement this interface
+    public interface OnHeadlineSelectedListener2 {
+        public void onRefreshed2();
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mCallback = (OnHeadlineSelectedListener2) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnHeadlineSelectedListener");
+        }
     }
 
 

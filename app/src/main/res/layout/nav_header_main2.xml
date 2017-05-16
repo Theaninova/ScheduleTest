@@ -14,16 +14,16 @@
         android:layout_height="wrap_content"
         android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/background_navbar"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/background_navbar_v2"
         tools:layout_conversion_absoluteHeight="14dp"
         tools:layout_conversion_absoluteWidth="379dp"
         tools:layout_conversion_absoluteX="16dp"
-        tools:layout_conversion_absoluteY="129dp"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintVertical_bias="0.0" />
+        tools:layout_conversion_absoluteY="129dp" />
 
     <ImageView
         android:id="@+id/imageView"
