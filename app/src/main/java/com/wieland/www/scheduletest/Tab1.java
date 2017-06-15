@@ -32,6 +32,7 @@ public class Tab1 extends Fragment {
     SwipeRefreshLayout SwipeRefresh;
     RecyclerView myList;
     Context context;
+    TextView textView;
 
     OnHeadlineSelectedListener mCallback;
 
@@ -56,6 +57,8 @@ public class Tab1 extends Fragment {
                 mCallback.onRefreshed();
             }
         });
+        textView = (TextView) getActivity().findViewById(R.id.content_main2_textView);
+
 
         context = getActivity();
         SetTextTask setText = new SetTextTask(Schedule.getSchedule(index, context), index, context);
@@ -151,6 +154,7 @@ public class Tab1 extends Fragment {
             View mHeaderView = menu2.getHeaderView(0);
             TextView username_view = (TextView) mHeaderView.findViewById(R.id.textView_username);
             username_view.setText(pref.getString("set_username", "[Nutzername]"));
+            textView.setText(putIn1);
 
             //setTitle(Schedule.getDate(this.index, this.context));
             SwipeRefresh.setRefreshing(false);

@@ -113,13 +113,13 @@ public class Main2Activity extends AppCompatActivity
     }
 
     public void onRefreshed() {
-        Refresh refresh = new Refresh(this, Schedule.getUpdateDate(1, this), Schedule.getUpdateDate(2, this));
-        refresh.execute();
+            Refresh refresh = new Refresh(this, Schedule.getUpdateDate(1, this), Schedule.getUpdateDate(2, this));
+            refresh.execute();
     }
 
     public void onRefreshed2() {
-        Refresh refresh = new Refresh(this, Schedule.getUpdateDate(1, this), Schedule.getUpdateDate(2, this));
-        refresh.execute();
+            Refresh refresh = new Refresh(this, Schedule.getUpdateDate(1, this), Schedule.getUpdateDate(2, this));
+            refresh.execute();
     }
 
     @Override
@@ -239,17 +239,24 @@ public class Main2Activity extends AppCompatActivity
                 toast.show();
             }
 
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .detach(tab1)
-                    .attach(tab1)
-                    .commit();
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .detach(tab2)
-                    .attach(tab2)
-                    .commit();
+            String tab1Tag = tab1.getTag();
+            String tab2Tag = tab2.getTag();
 
+            android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.remove(tab1);
+            fragmentTransaction.commit();
+            getSupportFragmentManager().executePendingTransactions();
+            fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.add(tab1, tab1Tag);
+            fragmentTransaction.commit();
+
+            android.support.v4.app.FragmentTransaction fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction2.remove(tab2);
+            fragmentTransaction2.commit();
+            getSupportFragmentManager().executePendingTransactions();
+            fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction2.add(tab2, tab2Tag);
+            fragmentTransaction2.commit();
 
             setTitle(Schedule.getUpdateDate(1, context));
         }
