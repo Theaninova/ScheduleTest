@@ -32,7 +32,6 @@ public class Tab2 extends Fragment {
     SwipeRefreshLayout SwipeRefresh;
     RecyclerView myList;
     Context context;
-    TextView textView;
 
     OnHeadlineSelectedListener2 mCallback;
 
@@ -57,7 +56,6 @@ public class Tab2 extends Fragment {
                 mCallback.onRefreshed2();
             }
         });
-        textView = (TextView) getActivity().findViewById(R.id.content_main3_textView);
 
         context = getActivity();
         SetTextTask setText = new SetTextTask(Schedule.getSchedule(index, context), index, context);
@@ -87,15 +85,11 @@ public class Tab2 extends Fragment {
     public class SetTextTask extends AsyncTask<Void, Void, Boolean> {
 
         private final Document doc;
-        private final int index;
         private final Context context;
         private Layout_Row adapter;
-        private String putIn1;
-        private String putIn2;
 
         SetTextTask (Document doc, int index, Context context) {
             this.doc = doc;
-            this.index = index;
             this.context = context;
         }
 
@@ -104,8 +98,6 @@ public class Tab2 extends Fragment {
             ArrayList<String> willBeSet;
 
             ArrayList<ArrayList<android.text.Spanned>> listInList = new ArrayList<>();
-
-
 
             ScheduleHandler myHandler = new ScheduleHandler(doc);
             willBeSet = myHandler.getClassList();
@@ -116,25 +108,6 @@ public class Tab2 extends Fragment {
 
             Layout_Row adapter = new Layout_Row(willBeSet, listInList, this.context);
             this.adapter = adapter;
-
-
-
-
-            String putIn1 = "";
-            if (Schedule.getDate(1, getActivity()).contains("erscheint"))
-                putIn1 = "Nicht verfügbar.";
-            else
-                putIn1 = Schedule.getDate(1, getActivity());
-
-            this.putIn1 = putIn1;
-
-            String putIn2 = "";
-            if (Schedule.getDate(2, getActivity()).contains("erscheint"))
-                putIn2 = "Nicht verfügbar.";
-            else
-                putIn2 = Schedule.getDate(2, getActivity());
-
-            this.putIn2 = putIn2;
 
             return true;
         }
@@ -153,7 +126,6 @@ public class Tab2 extends Fragment {
             View mHeaderView = menu2.getHeaderView(0);
             TextView username_view = (TextView) mHeaderView.findViewById(R.id.textView_username);
             username_view.setText(pref.getString("set_username", "[Nutzername]"));
-            textView.setText(putIn2);
 
             //setTitle(Schedule.getDate(this.index, this.context));
             SwipeRefresh.setRefreshing(false);

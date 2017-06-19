@@ -124,10 +124,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
 
             alertDialogBuilder.setTitle("Hinweis");
-            alertDialogBuilder.setMessage("Dies ist eine Vorabversion, es können also Fehler auftreten. Features können entfernt oder unangekündigt geändert werden. Alle Angaben sind ohne Gewähr.");
+            alertDialogBuilder.setMessage("Dies ist eine Vorabversion, es können also Fehler auftreten. Features können entfernt oder unangekündigt geändert werden. Alle Angaben sind ohne Gewähr. Info: Beta Programm: neue Features werden ab jetzt zuerst im Betaprogramm getestet. Anmeldung dazu im Playstore. REPRODUZIERBARE ABSTÜRZE BITTE ÜBER DEN FEEDBACK BUTTON MELDEN!");
             alertDialogBuilder.setCancelable(false);
             alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
+
                     showProgress(true);
                     mAuthTask = new UserLoginTask(email, password);
                     mAuthTask.execute((Void) null);

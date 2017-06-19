@@ -20,6 +20,8 @@ public class ActivityRowNew extends BaseAdapter {
         this.context = context;
     }
 
+    public ActivityRowNew() {}
+
 
     @Override
     public long getItemId(int position) {

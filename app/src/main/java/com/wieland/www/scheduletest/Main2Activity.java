@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
@@ -24,6 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TabHost;
 import android.widget.TabWidget;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.jsoup.nodes.Document;
@@ -40,6 +42,7 @@ public class Main2Activity extends AppCompatActivity
     private PagerAdapter pagerAdapter;
     private android.support.v4.app.Fragment tab1;
     private android.support.v4.app.Fragment tab2;
+    private TabLayout tabLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +52,7 @@ public class Main2Activity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         final ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
@@ -108,6 +111,23 @@ public class Main2Activity extends AppCompatActivity
                 alertDialog.show();
             }
         }
+
+        //SET TAB TEXT
+        String putIn1 = "";
+        if (Schedule.getDate(1, this).contains("erscheint"))
+            putIn1 = "Nicht verfügbar.";
+        else
+            putIn1 = Schedule.getDate(1, this);
+
+        tabLayout.getTabAt(0).setText(putIn1); //setting Tab Title (Date)
+
+        putIn1 = "";
+        if (Schedule.getDate(2, this).contains("erscheint"))
+            putIn1 = "Nicht verfügbar.";
+        else
+            putIn1 = Schedule.getDate(2, this);
+        tabLayout.getTabAt(1).setText(putIn1);
+        //SET TAB TEXT END
 
         setTitle(Schedule.getUpdateDate(1, this));
     }
@@ -174,7 +194,7 @@ public class Main2Activity extends AppCompatActivity
         } else if (id == R.id.nav_share) {
             Intent i = new Intent(Intent.ACTION_SENDTO);
             i.setType("text/plain");
-            i.setData(Uri.parse("mailto:" + "wulkanat@gmail.com"));
+            i.setData(Uri.parse("mailto:" + "myroro.dev@gmail.com"));
             i.putExtra(Intent.EXTRA_SUBJECT, "myRoRo Feedback");
             //i.putExtra(Intent.EXTRA_TEXT   , "body of email");
             try {
@@ -257,6 +277,25 @@ public class Main2Activity extends AppCompatActivity
             fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
             fragmentTransaction2.add(tab2, tab2Tag);
             fragmentTransaction2.commit();
+
+
+            //SET TAB TEXT
+            String putIn1 = "";
+            if (Schedule.getDate(1, context).contains("erscheint"))
+                putIn1 = "Nicht verfügbar.";
+            else
+                putIn1 = Schedule.getDate(1, context);
+
+            tabLayout.getTabAt(0).setText(putIn1); //setting Tab Title (Date)
+
+            putIn1 = "";
+            if (Schedule.getDate(2, context).contains("erscheint"))
+                putIn1 = "Nicht verfügbar.";
+            else
+                putIn1 = Schedule.getDate(2, context);
+            tabLayout.getTabAt(1).setText(putIn1);
+            //SET TAB TEXT END
+
 
             setTitle(Schedule.getUpdateDate(1, context));
         }
