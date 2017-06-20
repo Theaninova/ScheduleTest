@@ -1,5 +1,8 @@
 package com.wieland.www.scheduletest;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.text.Html;
 
 import org.jsoup.nodes.Document;
@@ -12,11 +15,13 @@ import java.util.ArrayList;
  */
 
 public class ScheduleHandler {
-    Document doc;
+    DatabaseHelper databaseHelper;
+    private int index;
     private ArrayList<String> myList = new ArrayList<>();
 
-    public ScheduleHandler(Document doc) {
-        this.doc = doc;
+    public ScheduleHandler(int index, Context context) {
+        databaseHelper = new DatabaseHelper(context);
+        this.index = index;
     }
 
     /**
@@ -26,17 +31,14 @@ public class ScheduleHandler {
 
         ArrayList<String> outputList = new ArrayList<>();  //this is the List which will be put out. at the end it will contain all Classes that are appearing in the schedule
 
-        String tmpClass = "";
-
-        for (org.jsoup.nodes.Element table : this.doc.select("table")) {
-            for (org.jsoup.nodes.Element row : table.select("tr")) {
-                Elements tds = row.select("td");
-
-                if (!(tds.get(0).text().equals("Kl.") || tds.get(0).text().equals("\u00a0") || tds.get(0).text().equals(tmpClass))) {   //checking for irrelevant data (such as KL., which appears at the top, and \u00a0, which stands for an empty field
-                    outputList.add(tds.get(0).text()); //the text will be added to a list
-                    tmpClass = tds.get(0).text(); //so no class will be returned twice
-                }
-            }
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        Cursor res;
+        if (index == 1)
+            res = db.rawQuery("SELECT kl FROM " + databaseHelper.TABLE_NAME + " GROUP BY kl", null);
+        else
+            res = db.rawQuery("SELECT kl FROM " + databaseHelper.TABLE_NAME2 + " GROUP BY kl", null);
+        while (res.moveToNext()) {
+            outputList.add(res.getString(0));
         }
 
         return outputList;
@@ -50,137 +52,106 @@ public class ScheduleHandler {
     public ArrayList<android.text.Spanned> getClassInfo(String thisClass) {
         myList.clear();
 
-        boolean take = false;
-        boolean inClass = false;
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        Cursor res;
+        if (index == 1)
+            res = db.rawQuery("SELECT * FROM " + databaseHelper.TABLE_NAME + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'", null);
+        else
+            res = db.rawQuery("SELECT * FROM " + databaseHelper.TABLE_NAME2 + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'", null);
 
         boolean forInfo = true;
 
-        for (org.jsoup.nodes.Element table : doc.select("table")) {
-            for (org.jsoup.nodes.Element row : table.select("tr")) {
-                Elements tds = row.select("td");
-                if(tds.get(0).text().equals(thisClass)) {
-                    take = true;
-                    inClass = true;
-                } else if(tds.get(0).text().equals("\u00a0") && inClass) {
-                    take = true;
-                } else {
-                    take = false;
-                    inClass = false;
-                }
-
-                if(take) {
-                    for(int i = 1; i <= 7; i++) {
-                        if (tds.get(i).text().equals("\u00a0")) {
-                            myList.add("null");
-                        } else {
-                            myList.add(tds.get(i).text());
-                        }
-                    }
-                }
-            }
-        }
-
-        if (myList.isEmpty())
-            return null;
+        //if (myList.isEmpty())
+        //    return null;
 
         int linePositon = 0;
 
         ArrayList<android.text.Spanned> outList = new ArrayList<>();
 
-        while (true) {
+        while (res.moveToNext()) {
             forInfo = true;
             String output = "";
 
-            try {
-                if (myList.size() < 6)
-                    return null;
+            if (res.getString(2).contains("\u00A0"))
+                output = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+            else if (res.getString(2).contains("10"))
+                output = res.getString(2) + ".&nbsp;";
+            else
+                output = res.getString(2) + ".&nbsp;&nbsp;";
 
-                if (myList.get(0 + linePositon).equals("null"))
-                    output = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                else if (myList.get(0 + linePositon).contains("10"))
-                    output = myList.get(0 + linePositon) + ".&nbsp;";
+
+            if (res.getString(6).contains("\u00A0")) {
+                if (res.getString(3).contains("\u00A0"))
+                    output = output + getColoredSpanned("[Fach]", "grey");
                 else
-                    output = myList.get(0 + linePositon) + ".&nbsp;&nbsp;";
+                    output = output + getColoredSpanned(res.getString(3), "#008000");
+            } else {
+                output = output + getColoredSpanned(res.getString(6), "#8B0000");
+            }
 
-                /*if (myList.get(6 + linePositon).contains("ganze Klasse")) {
-                    output = output + "Ganze Klasse ";
-                }*/
+            if (res.getString(5).contains("*Frei")) {
+                output = output + " " + getColoredSpanned("entfällt", "8B0000");
+                forInfo = false;
+            } else if (res.getString(5).contains("Raum�nderung")) {
+                output = output + ": Raumänderung in Raum " + getColoredSpanned(res.getString(7), "#8B0000");
+                forInfo = false;
+            } else if (res.getString(5).contains("*Stillarbeit")) {
+                //if (myList.get(3) == "null")  //TODO: Stillarbeit Teacher
+                if (res.getString(4).contains("\u00A0"))
+                    output = output + ": " + getColoredSpanned("Stillarbeit", "#8B0000");
+                else
+                    output = output + ": " + getColoredSpanned("Stillarbeit", "#8B0000") + " in Raum " + getColoredSpanned(res.getString(4), "#008000");
+                forInfo = false;
+            }
 
-                if (myList.get(4 + linePositon) == "null") {
-                    if (myList.get(1 + linePositon).equals("null"))
-                        output = output + getColoredSpanned("[Fach]", "grey");
-                    else
-                        output = output + getColoredSpanned(myList.get(1 + linePositon), "#008000");
+
+            if (forInfo) {
+                output = output + " bei ";
+
+                if (res.getString(5).contains("\u00A0")) {
+                    output = output + getColoredSpanned("[Lehrer]", "grey");
                 } else {
-                    output = output + getColoredSpanned(myList.get(4 + linePositon), "#8B0000");
-                }
-
-                if (myList.get(3 + linePositon).contains("*Frei")) {
-                    output = output + " " + getColoredSpanned("entfällt", "8B0000");
-                    forInfo = false;
-                } else if (myList.get(3 + linePositon).contains("Raum�nderung")) {
-                    output = output + ": Raumänderung in Raum " + getColoredSpanned(myList.get(5 + linePositon), "#8B0000");
-                    forInfo = false;
-                } else if (myList.get(3 + linePositon).contains("*Stillarbeit")) {
-                    //if (myList.get(3) == "null")  //TODO: Stillarbeit Teacher
-                    if (myList.get(2 + linePositon).equals("null"))
-                        output = output + ": " + getColoredSpanned("Stillarbeit", "#8B0000");
-                    else
-                        output = output + ": " + getColoredSpanned("Stillarbeit", "#8B0000") + " in Raum " + getColoredSpanned(myList.get(2 + linePositon), "#008000");
-                    forInfo = false;
+                    output = output + getColoredSpanned(res.getString(5), "#8B0000");
                 }
 
 
-                if (forInfo) {
-                    output = output + " bei ";
-
-                    if (myList.get(3 + linePositon) == "null") {
-                        output = output + getColoredSpanned("[Lehrer]", "grey");
-                    } else {
-                        output = output + getColoredSpanned(myList.get(3 + linePositon), "#8B0000");
+                if (res.getString(7).contains("\u00A0")) {
+                    if (res.getString(4).contains("\u00A0"))
+                        output = output + " in " + getColoredSpanned("[Raum]", "grey");
+                    else {
+                        output = output + " in Raum " + getColoredSpanned(res.getString(4), "#008000");
                     }
-
-
-                    if (myList.get(5 + linePositon) == "null") {
-                        if (myList.get(2 + linePositon) == "null")
-                            output = output + " in " + getColoredSpanned("[Raum]", "grey");
-                        else {
-                            output = output + " in Raum " + getColoredSpanned(myList.get(2 + linePositon), "#008000");
-                        }
-                    } else {
-                        output = output + " in Raum ";
-                        output = output + getColoredSpanned(myList.get(5 + linePositon), "#8B0000");
-                    }
+                } else {
+                    output = output + " in Raum ";
+                    output = output + getColoredSpanned(res.getString(7), "#8B0000");
                 }
+            }
 
-                int six = 6 + linePositon;
-
-                if (myList.get(six).contains("verschoben")) {
-                    output = myList.get(linePositon) + ".&nbsp;&nbsp;" + getColoredSpanned(myList.get(1 + linePositon), "#008000") + " wird " + getColoredSpanned(myList.get(six), "#8B0000");  //[Fach] wird [verschoben auf Datum]
-                } else if (myList.get(six).contains("anstatt")) {
-                    output = output + " " + myList.get(6 + linePositon);
-                } else if (myList.get(six).contains("Aufg. erteilt")) {
-                    output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned("Aufgaben erteilt", "grey");
-                } else if (myList.get(six).contains("Aufg. f�r zu Hause erteilt")) {
-                    output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned("Aufgaben für Zuhause erteilt", "grey");
-                } else if (myList.get(six).contains("Aufg. f�r Stillarbeit erteilt")) {
-                    output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned("Aufgaben für Stillarbeit erteilt", "grey");
+            if (res.getString(8).contains("verschoben")) {
+                if (res.getString(2).contains("\u00A0"))
+                    output = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned(res.getString(3), "#008000") + " wird " + getColoredSpanned(res.getString(8), "#8B0000");
+                else
+                    output = res.getString(2) + ".&nbsp;&nbsp;" + getColoredSpanned(res.getString(3), "#008000") + " wird " + getColoredSpanned(res.getString(8), "#8B0000");  //[Fach] wird [verschoben auf Datum]
+            } else if (res.getString(8).contains("anstatt")) {
+                output = output + " " + res.getString(8);
+            } else if (res.getString(8).contains("Aufg. erteilt")) {
+                output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned("Aufgaben erteilt", "grey");
+            } else if (res.getString(8).contains("Aufg. f�r zu Hause erteilt")) {
+                output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned("Aufgaben für Zuhause erteilt", "grey");
+            } else if (res.getString(8).contains("Aufg. f�r Stillarbeit erteilt")) {
+                output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned("Aufgaben für Stillarbeit erteilt", "grey");
                 //} else if (myList.get(six).contains("ganze Klasse")) {
-                } else if (myList.get(six) != "null") {
-                    output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned(myList.get(six), "grey");
-                }
-            } catch (Exception e) {
-                break;
+            } else if (!res.getString(8).contains("\u00A0")) {
+                output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned(res.getString(8), "grey");
             }
 
             outList.add(Html.fromHtml(output));
-            linePositon = linePositon + 7;
         }
 
         return outList;
     }
 
-    private String getColoredSpanned(String text, String color) {  //TODO: colored text
+    private String getColoredSpanned(String text, String color) {
         String input = "<font color=" + color + ">" + text + "</font>";
         return input;
     }

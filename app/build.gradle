@@ -7,8 +7,8 @@ android {
         applicationId "com.wieland.www.scheduletest"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 3
-        versionName "2.1.2"
+        versionCode 4
+        versionName "2.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }

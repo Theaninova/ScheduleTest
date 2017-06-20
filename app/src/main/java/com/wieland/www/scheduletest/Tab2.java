@@ -99,7 +99,7 @@ public class Tab2 extends Fragment {
 
             ArrayList<ArrayList<android.text.Spanned>> listInList = new ArrayList<>();
 
-            ScheduleHandler myHandler = new ScheduleHandler(doc);
+            ScheduleHandler myHandler = new ScheduleHandler(index, context);
             willBeSet = myHandler.getClassList();
 
             for (int i = 0; i < willBeSet.size(); i++) {

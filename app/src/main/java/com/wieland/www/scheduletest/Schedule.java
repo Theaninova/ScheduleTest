@@ -8,10 +8,12 @@ package com.wieland.www.scheduletest;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.StrictMode;
+import android.widget.Toast;
 
 import org.apache.commons.codec.binary.Base64;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
 import java.io.IOException;
 
@@ -41,6 +43,7 @@ public class Schedule {
     public static void refresh(Context context) throws IOException {
 
         SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
+        DatabaseHelper databaseHelper = new DatabaseHelper(context);
         SharedPreferences.Editor editor = pref.edit();
 
         String username = pref.getString("set_username", "-1");
@@ -64,6 +67,28 @@ public class Schedule {
 
         editor.putString("Day1", doc.toString());
 
+        //START SQL
+        databaseHelper.getWritableDatabase().delete(DatabaseHelper.TABLE_NAME, null, null); //clear database
+        boolean success = false; //for checking
+        String currentClass = "Aufsicht";
+        for (org.jsoup.nodes.Element table : doc.select("table")) {
+            for (org.jsoup.nodes.Element row : table.select("tr")) {
+                Elements tds = row.select("td");
+
+                if (!(tds.get(0).toString().contains("&nbsp;"))) { //All rows will need a class name, otherwise it will be much more difficult to parse the data
+                    if (!tds.get(0).text().contains("Kl.")) {   //checking for irrelevant data (such as KL., which appears at the top.)
+                        currentClass = tds.get(0).text();
+                        success = databaseHelper.insertData(1, tds.get(0).text(), tds.get(1).text(), tds.get(2).text(), tds.get(3).text(), tds.get(4).text(), tds.get(5).text(), tds.get(6).text(), tds.get(7).text()); //inserting all the data into the SQL database
+                    }
+                } else {
+                    success = databaseHelper.insertData(1, currentClass, tds.get(1).text(), tds.get(2).text(), tds.get(3).text(), tds.get(4).text(), tds.get(5).text(), tds.get(6).text(), tds.get(7).text()); //inserting all the data into the SQL database
+                }
+            }
+        }
+        //if(success) //for cheking, but causes a crash
+        //    Toast.makeText(context, "succesful!", Toast.LENGTH_SHORT);
+        //END SQL
+
         URL = "http://www.romain-rolland-gymnasium.eu/schuelerbereich/svplaneinseitig/V_TK_002_1.html";
 
         doc = Jsoup
@@ -73,6 +98,28 @@ public class Schedule {
                 .get();
 
         editor.putString("Day2", doc.toString());
+
+        //START SQL
+        databaseHelper.getWritableDatabase().delete(DatabaseHelper.TABLE_NAME2, null, null); //clear database
+        success = false; //for checking
+        currentClass = "Aufsicht";
+        for (org.jsoup.nodes.Element table : doc.select("table")) {
+            for (org.jsoup.nodes.Element row : table.select("tr")) {
+                Elements tds = row.select("td");
+
+                if (!(tds.get(0).toString().contains("&nbsp;"))) { //All rows will need a class name, otherwise it will be much more difficult to parse the data
+                    if (!tds.get(0).text().contains("Kl.")) {   //checking for irrelevant data (such as KL., which appears at the top.)
+                        currentClass = tds.get(0).text();
+                        success = databaseHelper.insertData(2, tds.get(0).text(), tds.get(1).text(), tds.get(2).text(), tds.get(3).text(), tds.get(4).text(), tds.get(5).text(), tds.get(6).text(), tds.get(7).text()); //inserting all the data into the SQL database
+                    }
+                } else {
+                    success = databaseHelper.insertData(2, currentClass, tds.get(1).text(), tds.get(2).text(), tds.get(3).text(), tds.get(4).text(), tds.get(5).text(), tds.get(6).text(), tds.get(7).text()); //inserting all the data into the SQL database
+                }
+            }
+        }
+        //if(success) //for cheking, but causes a crash
+        //    Toast.makeText(context, "succesful!", Toast.LENGTH_SHORT);
+        //END SQL
 
         editor.commit();
     }
