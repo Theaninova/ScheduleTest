@@ -252,7 +252,7 @@ public class Main2Activity extends AppCompatActivity
                 }
             }
             else if(Objects.equals(compare1, compare3) && Objects.equals(compare2, compare4)) {
-                Toast toast = Toast.makeText(context, "Plan ist bereits aktuell: " + Schedule.getUpdateDate(1, context), Toast.LENGTH_LONG);
+                Toast toast = Toast.makeText(context, "Plan ist bereits aktuell."/*: " + Schedule.getUpdateDate(1, context)*/, Toast.LENGTH_LONG);
                 toast.show();
             } else {
                 Toast toast = Toast.makeText(context, "Neuer Plan geladen: " + Schedule.getUpdateDate(1, context), Toast.LENGTH_LONG);

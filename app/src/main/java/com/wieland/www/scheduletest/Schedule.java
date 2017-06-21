@@ -65,8 +65,6 @@ public class Schedule {
                 .userAgent("Android Phone") //may be obsolete, but removing this could end in problems in future updates of the website
                 .get();
 
-        editor.putString("Day1", doc.toString());
-
         //START SQL
         databaseHelper.getWritableDatabase().delete(DatabaseHelper.TABLE_NAME, null, null); //clear database
         boolean success = false; //for checking
@@ -89,6 +87,15 @@ public class Schedule {
         //    Toast.makeText(context, "succesful!", Toast.LENGTH_SHORT);
         //END SQL
 
+        //SAVING DATES
+        String out;
+        out = doc.select("h2").text();
+        editor.putString("Day1_Date", out);
+
+        out = doc.select("h1").text();
+        editor.putString("Day1_UpdateDate", out);
+        //END SAVING DATES
+
         URL = "http://www.romain-rolland-gymnasium.eu/schuelerbereich/svplaneinseitig/V_TK_002_1.html";
 
         doc = Jsoup
@@ -97,11 +104,8 @@ public class Schedule {
                 .userAgent("Android Phone") //may be obsolete, but removing this could end in problems in future updates of the website
                 .get();
 
-        editor.putString("Day2", doc.toString());
-
         //START SQL
         databaseHelper.getWritableDatabase().delete(DatabaseHelper.TABLE_NAME2, null, null); //clear database
-        success = false; //for checking
         currentClass = "Aufsicht";
         for (org.jsoup.nodes.Element table : doc.select("table")) {
             for (org.jsoup.nodes.Element row : table.select("tr")) {
@@ -110,16 +114,23 @@ public class Schedule {
                 if (!(tds.get(0).toString().contains("&nbsp;"))) { //All rows will need a class name, otherwise it will be much more difficult to parse the data
                     if (!tds.get(0).text().contains("Kl.")) {   //checking for irrelevant data (such as KL., which appears at the top.)
                         currentClass = tds.get(0).text();
-                        success = databaseHelper.insertData(2, tds.get(0).text(), tds.get(1).text(), tds.get(2).text(), tds.get(3).text(), tds.get(4).text(), tds.get(5).text(), tds.get(6).text(), tds.get(7).text()); //inserting all the data into the SQL database
+                        databaseHelper.insertData(2, tds.get(0).text(), tds.get(1).text(), tds.get(2).text(), tds.get(3).text(), tds.get(4).text(), tds.get(5).text(), tds.get(6).text(), tds.get(7).text()); //inserting all the data into the SQL database
                     }
                 } else {
-                    success = databaseHelper.insertData(2, currentClass, tds.get(1).text(), tds.get(2).text(), tds.get(3).text(), tds.get(4).text(), tds.get(5).text(), tds.get(6).text(), tds.get(7).text()); //inserting all the data into the SQL database
+                    databaseHelper.insertData(2, currentClass, tds.get(1).text(), tds.get(2).text(), tds.get(3).text(), tds.get(4).text(), tds.get(5).text(), tds.get(6).text(), tds.get(7).text()); //inserting all the data into the SQL database
                 }
             }
         }
-        //if(success) //for cheking, but causes a crash
-        //    Toast.makeText(context, "succesful!", Toast.LENGTH_SHORT);
         //END SQL
+
+        //SAVING DATES
+        out = doc.select("h2").text();
+        editor.putString("Day2_Date", out);
+
+        out = doc.select("h1").text();
+        editor.putString("Day2_UpdateDate", out);
+        //END SAVING DATES
+
 
         editor.commit();
     }
@@ -127,32 +138,18 @@ public class Schedule {
     public static String getDate(int index, Context context) {
         SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
 
-        String out;
-        Document doc;
-
         if (index == 1)
-            doc = Jsoup.parse(pref.getString("Day1", ""));
+            return pref.getString("Day1_Date", "");
         else
-            doc = Jsoup.parse(pref.getString("Day2", ""));
-
-        out = doc.select("h2").text();
-
-        return out;
+            return pref.getString("Day2_Date", "");
     }
 
     public static String getUpdateDate(int index, Context context) {
         SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
 
-        String out;
-        Document doc;
-
         if (index == 1)
-            doc = Jsoup.parse(pref.getString("Day1", ""));
+            return pref.getString("Day1_UpdateDate", "");
         else
-            doc = Jsoup.parse(pref.getString("Day2", ""));
-
-        out = doc.select("h1").text();
-
-        return out;
+            return pref.getString("Day2_UpdateDate", "");
     }
 }
