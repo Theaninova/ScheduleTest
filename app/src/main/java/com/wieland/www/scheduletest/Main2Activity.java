@@ -190,6 +190,8 @@ public class Main2Activity extends AppCompatActivity
         if (id == R.id.nav_heute) {
 
         } else if (id == R.id.nav_slideshow) {
+            Intent i = new Intent(this, PersonalizedActivity.class);
+            startActivity(i);
 
         } else if (id == R.id.nav_share) {
             Intent i = new Intent(Intent.ACTION_SENDTO);

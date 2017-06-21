@@ -44,6 +44,20 @@ public class ScheduleHandler {
         return outputList;
     }
 
+    public ArrayList<String> getCustomizedClassInfo(String sqlcode) throws Exception {
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        Cursor res;
+        res = db.rawQuery(sqlcode, null);
+        ArrayList<String> output = new ArrayList<>();
+
+        while (res.moveToNext()) {
+            String out = "";
+            for (int i = 0; i < 8; i++)
+                out = out + " | " + res.getString(i);
+            output.add(out);
+        }
+        return output;
+    }
 
     /**
      * @param thisClass needed to figure out weather the line specified up is still relevant for the class

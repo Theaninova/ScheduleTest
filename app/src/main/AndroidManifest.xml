@@ -44,6 +44,9 @@
         </activity>
         <activity android:name=".SettingsActivity" />
         <activity android:name=".ActivityRowNew" />
+        <activity android:name=".PersonalizedActivity"
+            android:parentActivityName=".Main2Activity">
+        </activity>
     </application>
 
 </manifest>

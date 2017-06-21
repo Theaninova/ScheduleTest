@@ -66,7 +66,7 @@ public class Schedule {
                 .get();
 
         //START SQL
-        databaseHelper.getWritableDatabase().delete(DatabaseHelper.TABLE_NAME, null, null); //clear database
+        context.deleteDatabase(DatabaseHelper.DATABASE_NAME); //clear database
         boolean success = false; //for checking
         String currentClass = "Aufsicht";
         for (org.jsoup.nodes.Element table : doc.select("table")) {
@@ -105,7 +105,6 @@ public class Schedule {
                 .get();
 
         //START SQL
-        databaseHelper.getWritableDatabase().delete(DatabaseHelper.TABLE_NAME2, null, null); //clear database
         currentClass = "Aufsicht";
         for (org.jsoup.nodes.Element table : doc.select("table")) {
             for (org.jsoup.nodes.Element row : table.select("tr")) {
