@@ -1,14 +1,18 @@
 package com.wieland.www.scheduletest;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.Html;
+import android.text.Spanned;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by Wieland on 29.03.2017.
@@ -17,11 +21,13 @@ import java.util.ArrayList;
 public class ScheduleHandler {
     DatabaseHelper databaseHelper;
     private int index;
+    Context context;
     private ArrayList<String> myList = new ArrayList<>();
 
     public ScheduleHandler(int index, Context context) {
         databaseHelper = new DatabaseHelper(context);
         this.index = index;
+        this.context = context;
     }
 
     /**
@@ -34,9 +40,9 @@ public class ScheduleHandler {
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
         Cursor res;
         if (index == 1)
-            res = db.rawQuery("SELECT kl FROM " + databaseHelper.TABLE_NAME + " GROUP BY kl", null);
+            res = db.rawQuery("SELECT " + databaseHelper.COL_1 + " FROM " + databaseHelper.TABLE_NAME + " GROUP BY " + databaseHelper.COL_1, null);
         else
-            res = db.rawQuery("SELECT kl FROM " + databaseHelper.TABLE_NAME2 + " GROUP BY kl", null);
+            res = db.rawQuery("SELECT " + databaseHelper.COL_1 + " FROM " + databaseHelper.TABLE_NAME2 + " GROUP BY " + databaseHelper.COL_1, null);
         while (res.moveToNext()) {
             outputList.add(res.getString(0));
         }
@@ -44,41 +50,147 @@ public class ScheduleHandler {
         return outputList;
     }
 
-    public ArrayList<String> getCustomizedClassInfo(String sqlcode) throws Exception {
-        SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        Cursor res;
-        res = db.rawQuery(sqlcode, null);
+    public ArrayList<String> getBySQL(String SQL) {
         ArrayList<String> output = new ArrayList<>();
-
-        while (res.moveToNext()) {
-            String out = "";
-            for (int i = 0; i < 8; i++)
-                out = out + " | " + res.getString(i);
-            output.add(out);
+        DatabaseHelper databaseHelper = new DatabaseHelper(context);
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        Cursor res = db.rawQuery(SQL, null);
+        while(res.moveToNext()) {
+            int i = 0;
+            while(true) {
+                try {
+                    output.add(res.getString(i));
+                } catch (Exception e) {
+                    break;
+                }
+                i++;
+            }
         }
         return output;
     }
 
-    /**
-     * @param thisClass needed to figure out weather the line specified up is still relevant for the class
-     * @return a single String with all the information from a specific row in the table
-     */
-    public ArrayList<android.text.Spanned> getClassInfo(String thisClass) {
-        myList.clear();
-
+    public ArrayList<String> getClassListPersonalized() {
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
         Cursor res;
-        if (index == 1)
-            res = db.rawQuery("SELECT * FROM " + databaseHelper.TABLE_NAME + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'", null);
-        else
-            res = db.rawQuery("SELECT * FROM " + databaseHelper.TABLE_NAME2 + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'", null);
+        SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
+        String coursesRaw = pref.getString(SettingsActivity.CLASSES_NAME, "");
+        ArrayList<String> outputList = new ArrayList<>();
+        if (coursesRaw == "")
+            return outputList;
 
+        ArrayList<String> extraArguments = new ArrayList<>();
+        String buffer = "";
+
+        for(int i = 0; i < coursesRaw.length(); i++) {
+            if (coursesRaw.charAt(i) == ';') {
+                extraArguments.add(databaseHelper.COL_3 + " = '" + buffer + "'");
+                buffer = "";
+            } else {
+                buffer = buffer + coursesRaw.charAt(i);
+            }
+        }
+
+        String extraArgumentsSQL = "";
+        if (extraArguments.size() != 0)
+            extraArgumentsSQL = " WHERE ";
+
+        for(int i = 0; i < extraArguments.size(); i++) {
+            extraArgumentsSQL = extraArgumentsSQL + extraArguments.get(i);
+            if(i < (extraArguments.size() - 1))
+                extraArgumentsSQL = extraArgumentsSQL + " or ";
+        }
+
+        if (index == 1)
+            res = db.rawQuery("SELECT " + databaseHelper.COL_1 + " FROM " + databaseHelper.TABLE_NAME  + extraArgumentsSQL + " GROUP BY " + databaseHelper.COL_1, null);
+        else
+            res = db.rawQuery("SELECT " + databaseHelper.COL_1 + " FROM " + databaseHelper.TABLE_NAME2 + extraArgumentsSQL + " GROUP BY "  + databaseHelper.COL_1, null);
+        while (res.moveToNext()) {
+            outputList.add(res.getString(0));
+        }
+
+        return outputList;
+    }
+
+    /**
+     * The basic idea of this method is that you have go a String in SharedPreferences. It will look like this: "gen 1;gku 1;Fr 2" The ; seperates them from each other. So this method returns
+     * a ArrayList of Spannable Strings with the Class you want and in addition only the courses you want. When the user puts in all the Info, first he will be asked to put in all the classes
+     * which potentially could fit the rules
+     * @param thisClass
+     * @return
+     */
+    public ArrayList<android.text.Spanned> getClassInfoPersonalized(String thisClass) {
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        Cursor res;
+        SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
+        String coursesRaw = pref.getString("Courses", "");
+
+        if (coursesRaw == "")
+            return new ArrayList<>();
+
+        ArrayList<String> extraArguments = new ArrayList<>();
+        String buffer = "";
+
+        for(int i = 0; i < coursesRaw.length(); i++) {
+            if ((coursesRaw.charAt(i) == ';') || (i == (coursesRaw.length() - 1))) {
+                if (i == (coursesRaw.length() - 1))
+                    buffer = buffer + coursesRaw.charAt(i);
+                extraArguments.add(databaseHelper.COL_3 + " = '" + buffer + "'");
+                buffer = "";
+            } else {
+                buffer = buffer + coursesRaw.charAt(i);
+            }
+        }
+
+        boolean moreThanZero = false;
+        String extraArgumentsSQL = "";
+        if(extraArguments.size() != 0) {
+            extraArgumentsSQL = " and (";
+            moreThanZero = true;
+        }
+
+        for(int i = 0; i < extraArguments.size(); i++) {
+            extraArgumentsSQL = extraArgumentsSQL + extraArguments.get(i);
+            if(i < (extraArguments.size() - 1))
+                extraArgumentsSQL = extraArgumentsSQL + " or ";
+        }
+
+        if(moreThanZero) {
+            if (index == 1)
+                return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'" + extraArgumentsSQL + ")");
+            else
+                return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME2 + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'" + extraArgumentsSQL + ")");
+        } else {
+            if (index == 1)
+                return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'" + extraArgumentsSQL);
+            else
+                return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME2 + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'" + extraArgumentsSQL);
+        }
+    }
+
+    public ArrayList<android.text.Spanned> getClassInfo(String thisClass) {
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        Cursor res;
+
+        if (index == 1)
+            return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'");
+        else
+            return  getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME2 + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'");
+    }
+
+    /**
+     * @param
+     * @return a single String with all the information from a specific row in the table
+     */
+    public ArrayList<android.text.Spanned> getClassInfoForSQL(String sql) {
         boolean forInfo = true;
 
-        //if (myList.isEmpty())
-        //    return null;
+        Cursor res;
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
 
-        int linePositon = 0;
+        if (index == 1)
+            res = db.rawQuery(sql, null);
+        else
+            res = db.rawQuery(sql, null);
 
         ArrayList<android.text.Spanned> outList = new ArrayList<>();
 
@@ -104,7 +216,7 @@ public class ScheduleHandler {
             }
 
             if (res.getString(5).contains("*Frei")) {
-                output = output + " " + getColoredSpanned("entfällt", "8B0000");
+                output = output + " " + getColoredSpanned("entfällt", "#8B0000");
                 forInfo = false;
             } else if (res.getString(5).contains("Raum�nderung")) {
                 output = output + ": Raumänderung in Raum " + getColoredSpanned(res.getString(7), "#8B0000");

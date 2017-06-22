@@ -2,9 +2,11 @@ package com.wieland.www.scheduletest;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Looper;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -96,17 +98,29 @@ public class Tab1 extends Fragment {
 
         @Override
         public Boolean doInBackground(Void... params) {
-            ArrayList<String> willBeSet;
+            ArrayList<String> willBeSet = new ArrayList<>();
 
             ArrayList<ArrayList<android.text.Spanned>> listInList = new ArrayList<>();
 
 
 
             ScheduleHandler myHandler = new ScheduleHandler(index, context);
-            willBeSet = myHandler.getClassList();
+            SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
+            if(pref.getBoolean("customizedLayout", true)) {
+                try {
+                    willBeSet = myHandler.getClassListPersonalized();
+                } catch (Exception e) {}
+            } else
+                willBeSet = myHandler.getClassList();
 
             for (int i = 0; i < willBeSet.size(); i++) {
-                listInList.add(myHandler.getClassInfo(willBeSet.get(i)));
+                if(pref.getBoolean("customizedLayout", true)) {
+                    try {
+                        listInList.add(myHandler.getClassInfoPersonalized(willBeSet.get(i)));
+                    } catch (Exception e) {}
+                }
+                else
+                    listInList.add(myHandler.getClassInfo(willBeSet.get(i)));
             }
 
             Layout_Row adapter = new Layout_Row(willBeSet, listInList, this.context);

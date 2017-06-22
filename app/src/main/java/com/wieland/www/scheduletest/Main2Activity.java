@@ -188,10 +188,64 @@ public class Main2Activity extends AppCompatActivity
         SharedPreferences preferences = getSharedPreferences("Tralala", MODE_PRIVATE);
 
         if (id == R.id.nav_heute) {
+            SharedPreferences pref = this.getSharedPreferences("Tralala", MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
 
-        } else if (id == R.id.nav_slideshow) {
+            editor.putBoolean("customizedLayout", false); //for communicating with the Fragments
+            editor.commit();
+
+            //REFRESH FRAGMENTS
+            String tab1Tag = tab1.getTag();
+            String tab2Tag = tab2.getTag();
+
+            android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.remove(tab1);
+            fragmentTransaction.commit();
+            getSupportFragmentManager().executePendingTransactions();
+            fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.add(tab1, tab1Tag);
+            fragmentTransaction.commit();
+
+            android.support.v4.app.FragmentTransaction fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction2.remove(tab2);
+            fragmentTransaction2.commit();
+            getSupportFragmentManager().executePendingTransactions();
+            fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction2.add(tab2, tab2Tag);
+            fragmentTransaction2.commit();
+            //END REFRESH FRAGMENTS
+        } else if (id == R.id.nav_news) {
+
             Intent i = new Intent(this, PersonalizedActivity.class);
             startActivity(i);
+
+        } else if (id == R.id.nav_slideshow) {
+            SharedPreferences pref = this.getSharedPreferences("Tralala", MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+
+            editor.putBoolean("customizedLayout", true); //for communicating with the Fragments
+            editor.commit();
+
+            //REFRESH FRAGMENTS
+            String tab1Tag = tab1.getTag();
+            String tab2Tag = tab2.getTag();
+
+            android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.remove(tab1);
+            fragmentTransaction.commit();
+            getSupportFragmentManager().executePendingTransactions();
+            fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.add(tab1, tab1Tag);
+            fragmentTransaction.commit();
+
+            android.support.v4.app.FragmentTransaction fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction2.remove(tab2);
+            fragmentTransaction2.commit();
+            getSupportFragmentManager().executePendingTransactions();
+            fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction2.add(tab2, tab2Tag);
+            fragmentTransaction2.commit();
+            //END REFRESH FRAGMENTS
 
         } else if (id == R.id.nav_share) {
             Intent i = new Intent(Intent.ACTION_SENDTO);

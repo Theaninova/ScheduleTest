@@ -42,18 +42,18 @@ public class PersonalizedActivity extends AppCompatActivity {
                 ScheduleHandler scheduleHandler = new ScheduleHandler(1, context);
                 try {
                     String a = editText.getText().toString();
-                    if((editText.getText().toString().charAt(0) != '0') && (editText.getText().toString().charAt(0) != '1') && (editText.getText().toString().charAt(0) != '2'))
-                        a = "0" + a;
-                    ArrayList<String> list;
-                    String command;
+                    /*if((editText.getText().toString().charAt(0) != '0') && (editText.getText().toString().charAt(0) != '1') && (editText.getText().toString().charAt(0) != '2'))
+                        a = "0" + a;*/
+                    ArrayList<String> list = scheduleHandler.getBySQL(a);
+                    /*String command;
                     if (!aSwitch.isChecked())
                         command = "SELECT * FROM " + DatabaseHelper.TABLE_NAME + " WHERE " + DatabaseHelper.COL_1 + " = '" + a + "'";
                     else
                         command = "SELECT * FROM " + DatabaseHelper.TABLE_NAME2 + " WHERE " + DatabaseHelper.COL_1 + " = '" + a + "'";
 
                     textView.setText(command);
-                    list = scheduleHandler.getCustomizedClassInfo(command);
-
+                    list = null;//scheduleHandler.getCustomizedClassInfo(command);
+*/
                     listView.setAdapter(new ArrayAdapter<>(context,
                             android.R.layout.simple_list_item_1,
                             android.R.id.text1,
