@@ -82,8 +82,10 @@ public class ScheduleHandler {
         String buffer = "";
 
         for(int i = 0; i < coursesRaw.length(); i++) {
-            if (coursesRaw.charAt(i) == ';') {
-                extraArguments.add(databaseHelper.COL_3 + " = '" + buffer + "'");
+            if ((coursesRaw.charAt(i) == ';') || (i == (coursesRaw.length() - 1))) {
+                if (i == (coursesRaw.length() - 1))
+                    buffer = buffer + coursesRaw.charAt(i);
+                extraArguments.add(databaseHelper.COL_1 + " = '" + buffer + "'");
                 buffer = "";
             } else {
                 buffer = buffer + coursesRaw.charAt(i);
@@ -101,9 +103,9 @@ public class ScheduleHandler {
         }
 
         if (index == 1)
-            res = db.rawQuery("SELECT " + databaseHelper.COL_1 + " FROM " + databaseHelper.TABLE_NAME  + extraArgumentsSQL + " GROUP BY " + databaseHelper.COL_1, null);
+            res = db.rawQuery("SELECT kl FROM " + databaseHelper.TABLE_NAME  + extraArgumentsSQL + " GROUP BY " + databaseHelper.COL_1 + ")", null);
         else
-            res = db.rawQuery("SELECT " + databaseHelper.COL_1 + " FROM " + databaseHelper.TABLE_NAME2 + extraArgumentsSQL + " GROUP BY "  + databaseHelper.COL_1, null);
+            res = db.rawQuery("SELECT kl FROM " + databaseHelper.TABLE_NAME2 + extraArgumentsSQL + " GROUP BY "  + databaseHelper.COL_1, null);
         while (res.moveToNext()) {
             outputList.add(res.getString(0));
         }
