@@ -9,11 +9,11 @@
         <item
             android:id="@+id/nav_slideshow"
             android:icon="@drawable/ic_playlist_add_black_24dp"
-            android:title="Personalisierte Ansicht (WIP)" />
+            android:title="Personalisierte Ansicht" />
         <item
             android:id="@+id/nav_news"
             android:icon="@drawable/ic_code_black_24dp"
-            android:title="Custom Query (coming soon)" />
+            android:title="Custom Query" />
     </group>
 
     <item android:title="Links">
