@@ -69,6 +69,12 @@ public class ScheduleHandler {
         return output;
     }
 
+    /*public ArrayList<String> getClassListCustom() {
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        Cursor res;
+        SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
+    }*/
+
     public ArrayList<String> getClassListPersonalized() {
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
         Cursor res;
@@ -103,7 +109,7 @@ public class ScheduleHandler {
         }
 
         if (index == 1)
-            res = db.rawQuery("SELECT kl FROM " + databaseHelper.TABLE_NAME  + extraArgumentsSQL + " GROUP BY " + databaseHelper.COL_1 + ")", null);
+            res = db.rawQuery("SELECT kl FROM " + databaseHelper.TABLE_NAME  + extraArgumentsSQL + " GROUP BY " + databaseHelper.COL_1, null);
         else
             res = db.rawQuery("SELECT kl FROM " + databaseHelper.TABLE_NAME2 + extraArgumentsSQL + " GROUP BY "  + databaseHelper.COL_1, null);
         while (res.moveToNext()) {
@@ -170,9 +176,6 @@ public class ScheduleHandler {
     }
 
     public ArrayList<android.text.Spanned> getClassInfo(String thisClass) {
-        SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        Cursor res;
-
         if (index == 1)
             return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'");
         else

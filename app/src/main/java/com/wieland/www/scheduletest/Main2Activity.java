@@ -21,6 +21,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TabHost;
@@ -78,10 +79,6 @@ public class Main2Activity extends AppCompatActivity
             }
         });
 
-
-
-
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -130,6 +127,14 @@ public class Main2Activity extends AppCompatActivity
         //SET TAB TEXT END
 
         setTitle(Schedule.getUpdateDate(1, this));
+
+        SharedPreferences pref = this.getSharedPreferences("Tralala", MODE_PRIVATE);
+        if(pref.getInt("customizedLayout2", 1) == 1)
+            navigationView.setCheckedItem(R.id.nav_heute);
+        else if(pref.getInt("customizedLayout2", 1) == 2)
+            navigationView.setCheckedItem(R.id.nav_slideshow);
+        else
+            navigationView.setCheckedItem(R.id.nav_news);
     }
 
     public void onRefreshed() {
@@ -191,7 +196,7 @@ public class Main2Activity extends AppCompatActivity
             SharedPreferences pref = this.getSharedPreferences("Tralala", MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
 
-            editor.putBoolean("customizedLayout", false); //for communicating with the Fragments
+            editor.putInt("customizedLayout2", 1); //for communicating with the Fragments
             editor.commit();
 
             //REFRESH FRAGMENTS
@@ -216,14 +221,38 @@ public class Main2Activity extends AppCompatActivity
             //END REFRESH FRAGMENTS
         } else if (id == R.id.nav_news) {
 
-            Intent i = new Intent(this, PersonalizedActivity.class);
-            startActivity(i);
+            SharedPreferences pref = this.getSharedPreferences("Tralala", MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+
+            editor.putInt("customizedLayout2", 3); //for communicating with the Fragments
+            editor.commit();
+
+            //REFRESH FRAGMENTS
+            String tab1Tag = tab1.getTag();
+            String tab2Tag = tab2.getTag();
+
+            android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.remove(tab1);
+            fragmentTransaction.commit();
+            getSupportFragmentManager().executePendingTransactions();
+            fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.add(tab1, tab1Tag);
+            fragmentTransaction.commit();
+
+            android.support.v4.app.FragmentTransaction fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction2.remove(tab2);
+            fragmentTransaction2.commit();
+            getSupportFragmentManager().executePendingTransactions();
+            fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction2.add(tab2, tab2Tag);
+            fragmentTransaction2.commit();
+            //END REFRESH FRAGMENTS
 
         } else if (id == R.id.nav_slideshow) {
             SharedPreferences pref = this.getSharedPreferences("Tralala", MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
 
-            editor.putBoolean("customizedLayout", true); //for communicating with the Fragments
+            editor.putInt("customizedLayout2", 2); //for communicating with the Fragments
             editor.commit();
 
             //REFRESH FRAGMENTS

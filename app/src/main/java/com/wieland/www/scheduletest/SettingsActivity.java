@@ -9,12 +9,13 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class SettingsActivity extends AppCompatActivity {
-    EditText classes, courses;
+    EditText classes, courses, customQuery;
     Button confirm;
     Context context;
 
     public static final String CLASSES_NAME = "Classes";
     public static final String COURSES_NAME = "Courses";
+    public static final String CUSTOMSQL_NAME = "CustomSQL";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +24,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         classes = (EditText) findViewById(R.id.editTextClass);
         courses = (EditText) findViewById(R.id.editTextCourses);
+        customQuery = (EditText) findViewById(R.id.editTextCustomSQL);
         confirm = (Button) findViewById(R.id.buttonSettingsConfirm);
         context = this;
 
@@ -30,6 +32,8 @@ public class SettingsActivity extends AppCompatActivity {
 
         classes.setText(sharedPreferences.getString(CLASSES_NAME, ""));
         courses.setText(sharedPreferences.getString(COURSES_NAME, ""));
+        customQuery.setText(sharedPreferences.getString(CUSTOMSQL_NAME, ""));
+
 
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -39,6 +43,7 @@ public class SettingsActivity extends AppCompatActivity {
 
                 editor.putString(COURSES_NAME, courses.getText().toString());
                 editor.putString(CLASSES_NAME, classes.getText().toString());
+                editor.putString(CUSTOMSQL_NAME, customQuery.getText().toString());
                 editor.commit();
             }
         });

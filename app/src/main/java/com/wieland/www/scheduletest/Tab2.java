@@ -103,7 +103,7 @@ public class Tab2 extends Fragment {
 
             ScheduleHandler myHandler = new ScheduleHandler(index, context);
             SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
-            if(pref.getBoolean("customizedLayout", true)) {
+            if(pref.getInt("customizedLayout2", 1) == 2) {
                 try {
                     willBeSet = myHandler.getClassListPersonalized();
                 } catch (Exception e) {}
@@ -111,7 +111,7 @@ public class Tab2 extends Fragment {
                 willBeSet = myHandler.getClassList();
 
             for (int i = 0; i < willBeSet.size(); i++) {
-                if(pref.getBoolean("customizedLayout", true)) {
+                if(pref.getInt("customizedLayout2", 1) == 2) {
                     try {
                         listInList.add(myHandler.getClassInfoPersonalized(willBeSet.get(i)));
                     } catch (Exception e) {}
