@@ -49,23 +49,25 @@ public class Layout_Row extends RecyclerView.Adapter<Layout_Row.Layout_Holder> {
     public void onBindViewHolder(Layout_Holder holder, int position) {
         String item = listData.get(position);
         //ScheduleHandler myNewHandler = new ScheduleHandler(this.doc);
-        ArrayList<android.text.Spanned> rowrowList = this.list.get(position);
+        if (this.list.size() != 0) {
+            ArrayList<android.text.Spanned> rowrowList = this.list.get(position);
 
-        //ActivityRowNew adapter = new ActivityRowNew(holder.itemView.getContext(), rowrowList);
-        
-        ArrayAdapter<android.text.Spanned> adapter = new ArrayAdapter<android.text.Spanned>(holder.itemView.getContext(),
-                android.R.layout.simple_list_item_1,
-                android.R.id.text1,
-                rowrowList);
+            //ActivityRowNew adapter = new ActivityRowNew(holder.itemView.getContext(), rowrowList);
 
-        holder.recyclerView.setEnabled(false);
+            ArrayAdapter<android.text.Spanned> adapter = new ArrayAdapter<android.text.Spanned>(holder.itemView.getContext(),
+                    android.R.layout.simple_list_item_1,
+                    android.R.id.text1,
+                    rowrowList);
 
-        holder.title.setText(item);
-        holder.recyclerView.setAdapter(adapter);
-        if(rowrowList.size() == 1) {
-            holder.subtitle.setText(rowrowList.size() + " Eintrag");
-        } else {
-            holder.subtitle.setText(rowrowList.size() + " Einträge");
+            holder.recyclerView.setEnabled(false);
+
+            holder.title.setText(item);
+            holder.recyclerView.setAdapter(adapter);
+            if (rowrowList.size() == 1) {
+                holder.subtitle.setText(rowrowList.size() + " Eintrag");
+            } else {
+                holder.subtitle.setText(rowrowList.size() + " Einträge");
+            }
         }
 
         setListViewHeightBasedOnItems(holder.recyclerView);

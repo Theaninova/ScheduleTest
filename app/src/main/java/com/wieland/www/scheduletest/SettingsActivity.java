@@ -34,7 +34,6 @@ public class SettingsActivity extends AppCompatActivity {
         courses.setText(sharedPreferences.getString(COURSES_NAME, ""));
         customQuery.setText(sharedPreferences.getString(CUSTOMSQL_NAME, ""));
 
-
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

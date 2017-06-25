@@ -69,11 +69,31 @@ public class ScheduleHandler {
         return output;
     }
 
-    /*public ArrayList<String> getClassListCustom() {
+    public ArrayList<String> getClassListCustom() throws Exception {
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
         Cursor res;
         SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
-    }*/
+        ArrayList<String> outputList = new ArrayList<>();
+
+        if (index == 1)
+            res = db.rawQuery("SELECT kl FROM " + databaseHelper.TABLE_NAME  + " WHERE " + pref.getString(SettingsActivity.CUSTOMSQL_NAME, "") + " GROUP BY " + databaseHelper.COL_1, null);
+        else
+            res = db.rawQuery("SELECT kl FROM " + databaseHelper.TABLE_NAME2 + " WHERE " + pref.getString(SettingsActivity.CUSTOMSQL_NAME, "") + " GROUP BY "  + databaseHelper.COL_1, null);
+        while (res.moveToNext()) {
+            outputList.add(res.getString(0));
+        }
+
+        return outputList;
+    }
+
+    public ArrayList<android.text.Spanned> getClassInfoCustom(String thisClass) throws Exception {
+        SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
+
+        if (index == 1)
+            return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME + " WHERE (" + pref.getString(SettingsActivity.CUSTOMSQL_NAME, "")+ ") and " + databaseHelper.COL_1 + " = '" + thisClass + "'");
+        else
+            return  getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME2 + " WHERE (" + pref.getString(SettingsActivity.CUSTOMSQL_NAME, "")+ ") and " + databaseHelper.COL_1 + " = '" + thisClass + "'");
+    }
 
     public ArrayList<String> getClassListPersonalized() {
         SQLiteDatabase db = databaseHelper.getWritableDatabase();

@@ -108,16 +108,24 @@ public class Tab1 extends Fragment {
                 try {
                     willBeSet = myHandler.getClassListPersonalized();
                 } catch (Exception e) {}
-            } else
+            } else if (pref.getInt("customizedLayout2", 1) == 1)
                 willBeSet = myHandler.getClassList();
+            else
+                try {
+                    willBeSet = myHandler.getClassListCustom();
+                } catch (Exception e) {}
 
             for (int i = 0; i < willBeSet.size(); i++) {
                 if(pref.getInt("customizedLayout2", 1) == 2) {
                     try {
                         listInList.add(myHandler.getClassInfoPersonalized(willBeSet.get(i)));
                     } catch (Exception e) {}
-                } else
+                } else if (pref.getInt("customizedLayout2", 1) == 1)
                     listInList.add(myHandler.getClassInfo(willBeSet.get(i)));
+                else
+                    try {
+                        listInList.add(myHandler.getClassInfoCustom(willBeSet.get(i)));
+                    } catch (Exception e) {}
             }
 
             Layout_Row adapter = new Layout_Row(willBeSet, listInList, this.context);

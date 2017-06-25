@@ -110,7 +110,7 @@
                 android:layout_marginLeft="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:text="Tabellennamen:\nday1\nday2\n\nSpaltennamen:\nkl\nstd\nfach\nraum\nvlehrer\nvfach\nvraum\ninfo\n\nACHTUNG: die ersten Spalte beinhaltet eine eindeutige id der Zeile."
+                android:text="Nur WHERE Kriterien, wie z. B. vlehrer = 'besc'\n\nSpaltennamen:\nkl\nstd\nfach\nraum\nvlehrer\nvfach\nvraum\ninfo\n\nACHTUNG: die ersten Spalte (noch vor kl) beinhaltet eine eindeutige id der Zeile."
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/editTextCustomSQL" />
         </LinearLayout>
