@@ -1,5 +1,6 @@
 package com.wieland.www.scheduletest;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -16,9 +17,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -31,13 +34,14 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Objects;
 
 //TODO: wire the OnScrollListener from the ListView manually http://nlopez.io/swiperefreshlayout-with-listview-done-right/
 
-public class Main2Activity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener, Tab1.OnHeadlineSelectedListener, Tab2.OnHeadlineSelectedListener2 {
+public class Main2Activity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener, Tab1.OnHeadlineSelectedListener, Tab2.OnHeadlineSelectedListener2 {
 
+    public static boolean firstTimeCreated = true;
     private PagerAdapter pagerAdapter;
     private android.support.v4.app.Fragment tab1;
     private android.support.v4.app.Fragment tab2;
@@ -106,51 +110,137 @@ public class Main2Activity extends AppCompatActivity
         setTitle(Schedule.getUpdateDate(1, this));
 
         SharedPreferences pref = this.getSharedPreferences("Tralala", MODE_PRIVATE);
-        if(pref.getInt("customizedLayout2", 1) == 1)
+        if (pref.getInt("customizedLayout2", 1) == 1)
             navigationView.setCheckedItem(R.id.nav_heute);
-        else if(pref.getInt("customizedLayout2", 1) == 2)
+        else if (pref.getInt("customizedLayout2", 1) == 2)
             navigationView.setCheckedItem(R.id.nav_slideshow);
         else
             navigationView.setCheckedItem(R.id.nav_news);
 
-        StartupRefresh startupRefresh = new StartupRefresh(this);
-        startupRefresh.startLoading();
+        Bundle loaderBndl = new Bundle();
+        final Context context = this;
+        getSupportLoaderManager().initLoader(1, loaderBndl, new LoaderManager.LoaderCallbacks<ArrayList<String>>() {
+            @Override
+            public Loader<ArrayList<String>> onCreateLoader(final int id, final Bundle args) {
+                return new RefreshLoader(context);
+            }
+
+            @Override
+            public void onLoadFinished(final Loader<ArrayList<String>> loader, final ArrayList<String> result) {
+                if (result == null)
+                    return;
+                String compare1 = result.get(0);
+                String compare2 = result.get(1);
+                String compare3 = Schedule.getUpdateDate(1, context);
+                String compare4 = Schedule.getUpdateDate(2, context);
+                try {
+                    result.get(2);
+                    if (result.get(2) == "HTTP error fetching URL") {
+                        Intent intent = new Intent(context, LoginActivity.class);
+                        startActivity(intent);
+                    } else {
+                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+
+                        alertDialogBuilder.setTitle("Verbindungsfehler");
+                        alertDialogBuilder.setMessage("Gespeicherter Plan von " + Schedule.getDate(1, getApplicationContext()) + " und " + Schedule.getDate(2, getApplicationContext()) + " wird geladen. Der Plan wurde auf der Webseite zuletzt am " + Schedule.getUpdateDate(1, context) + " aktualisiert.");
+                        alertDialogBuilder.setCancelable(false);
+                        alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                            }
+                        });
+                        AlertDialog alertDialog = alertDialogBuilder.create();
+                        alertDialog.show();
+                    }
+                } catch (Exception e) {}
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { //.equals() causes crash on <4.0 devices
+                    if (Objects.equals(compare1, compare3) && Objects.equals(compare2, compare4)) {
+                        Toast toast = Toast.makeText(context, "Plan ist bereits aktuell."/*: " + Schedule.getUpdateDate(1, context)*/, Toast.LENGTH_SHORT);
+                        toast.show();
+                    } else {
+                        Toast toast = Toast.makeText(context, "Neuer Plan geladen: " + Schedule.getUpdateDate(1, context), Toast.LENGTH_SHORT);
+                        toast.show();
+                        String tab1Tag = tab1.getTag();
+                        String tab2Tag = tab2.getTag();
+
+                        android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                        fragmentTransaction.remove(tab1);
+                        fragmentTransaction.commit();
+                        getSupportFragmentManager().executePendingTransactions();
+                        fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                        fragmentTransaction.add(tab1, tab1Tag);
+                        fragmentTransaction.commit();
+
+                        android.support.v4.app.FragmentTransaction fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
+                        fragmentTransaction2.remove(tab2);
+                        fragmentTransaction2.commit();
+                        getSupportFragmentManager().executePendingTransactions();
+                        fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
+                        fragmentTransaction2.add(tab2, tab2Tag);
+                        fragmentTransaction2.commit();
+                    }
+                } else {
+                        String tab1Tag = tab1.getTag();
+                        String tab2Tag = tab2.getTag();
+
+                        android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                        fragmentTransaction.remove(tab1);
+                        fragmentTransaction.commit();
+                        getSupportFragmentManager().executePendingTransactions();
+                        fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                        fragmentTransaction.add(tab1, tab1Tag);
+                        fragmentTransaction.commit();
+
+                        android.support.v4.app.FragmentTransaction fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
+                        fragmentTransaction2.remove(tab2);
+                        fragmentTransaction2.commit();
+                        getSupportFragmentManager().executePendingTransactions();
+                        fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
+                        fragmentTransaction2.add(tab2, tab2Tag);
+                        fragmentTransaction2.commit();
+                    }
+            }
+
+            @Override
+            public void onLoaderReset(final Loader<ArrayList<String>> loader) {
+            }
+        }).forceLoad();
+
+        /*RefreshLoader refreshLoader = new RefreshLoader(this);
+        refreshLoader.startLoading();*/
 
         StartNotificationService startNotificationService = new StartNotificationService(this);
         startNotificationService.startLoading();
     }
 
-    public class StartupRefresh extends AsyncTaskLoader<Boolean> {
+    public static class RefreshLoader extends AsyncTaskLoader<ArrayList<String>> {
         Context context;
+        String compare1;
+        String compare2;
+        ArrayList<String> out;
 
-        public StartupRefresh(Context context) {
+        public RefreshLoader(Context context) {
             super(context);
             this.context = context;
+            compare1 = Schedule.getUpdateDate(1, context);
+            compare2 = Schedule.getUpdateDate(2, context);
+            out = new ArrayList<>();
         }
 
         @Override
-        public Boolean loadInBackground() {
+        public ArrayList<String> loadInBackground() {
+            out.add(compare1);
+            out.add(compare2);
             try {
-                Schedule.refresh(getApplicationContext());
+                Schedule.refresh(context);
             } catch (IOException e) {
                 if (e.getMessage() == "HTTP error fetching URL") {
-                    Intent intent = new Intent(context, LoginActivity.class);
-                    startActivity(intent);
+                    out.add("HTTP error fetching URL");
                 } else {
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-
-                    alertDialogBuilder.setTitle("Verbindungsfehler");
-                    alertDialogBuilder.setMessage("Gespeicherter Plan von " + Schedule.getDate(1, getApplicationContext()) + " und " + Schedule.getDate(2, getApplicationContext()) + " wird geladen. Der Plan wurde auf der Webseite zuletzt am " + Schedule.getUpdateDate(1, context) + " aktualisiert.");
-                    alertDialogBuilder.setCancelable(false);
-                    alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                        }
-                    });
-                    AlertDialog alertDialog = alertDialogBuilder.create();
-                    alertDialog.show();
+                    out.add("z");
                 }
             }
-            return true;
+            return out;
         }
     }
 
@@ -171,7 +261,7 @@ public class Main2Activity extends AppCompatActivity
                                 BackgroundSync.class.getName()));
                 builder.setPeriodic(15 * 60 * 1000);//15 minutes
                 builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
-                if(jobScheduler.schedule(builder.build()) <= 0) {
+                if (jobScheduler.schedule(builder.build()) <= 0) {
                     Toast.makeText(getApplicationContext(),
                             "Fail", Toast.LENGTH_SHORT)
                             .show();
@@ -182,13 +272,13 @@ public class Main2Activity extends AppCompatActivity
     }
 
     public void onRefreshed() {
-            Refresh refresh = new Refresh(this, Schedule.getUpdateDate(1, this), Schedule.getUpdateDate(2, this));
-            refresh.execute();
+        Refresh refresh = new Refresh(this, Schedule.getUpdateDate(1, this), Schedule.getUpdateDate(2, this));
+        refresh.execute();
     }
 
     public void onRefreshed2() {
-            Refresh refresh = new Refresh(this, Schedule.getUpdateDate(1, this), Schedule.getUpdateDate(2, this));
-            refresh.execute();
+        Refresh refresh = new Refresh(this, Schedule.getUpdateDate(1, this), Schedule.getUpdateDate(2, this));
+        refresh.execute();
     }
 
     @Override
@@ -380,7 +470,7 @@ public class Main2Activity extends AppCompatActivity
                     toast.show();
                 }
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { //.equals() causes crash on <4.0 devices
-                if(Objects.equals(compare1, compare3) && Objects.equals(compare2, compare4)) {
+                if (Objects.equals(compare1, compare3) && Objects.equals(compare2, compare4)) {
                     Toast toast = Toast.makeText(context, "Plan ist bereits aktuell."/*: " + Schedule.getUpdateDate(1, context)*/, Toast.LENGTH_LONG);
                     toast.show();
                 } else {
