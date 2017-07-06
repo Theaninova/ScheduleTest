@@ -111,7 +111,7 @@ public class ScheduleHandler {
             if ((coursesRaw.charAt(i) == ';') || (i == (coursesRaw.length() - 1))) {
                 if (i == (coursesRaw.length() - 1))
                     buffer = buffer + coursesRaw.charAt(i);
-                extraArguments.add(databaseHelper.COL_1 + " = '" + buffer + "'");
+                extraArguments.add(databaseHelper.COL_1 + " = '" + buffer.trim() + "' COLLATE NOCASE");
                 buffer = "";
             } else {
                 buffer = buffer + coursesRaw.charAt(i);
@@ -123,7 +123,7 @@ public class ScheduleHandler {
             extraArgumentsSQL = " WHERE ";
 
         for(int i = 0; i < extraArguments.size(); i++) {
-            extraArgumentsSQL = extraArgumentsSQL + extraArguments.get(i);
+            extraArgumentsSQL = extraArgumentsSQL + extraArguments.get(i) + " COLLATE NOCASE";
             if(i < (extraArguments.size() - 1))
                 extraArgumentsSQL = extraArgumentsSQL + " or ";
         }
@@ -158,22 +158,36 @@ public class ScheduleHandler {
         ArrayList<String> extraArguments = new ArrayList<>();
         String buffer = "";
 
-        for(int i = 0; i < coursesRaw.length(); i++) {
-            if ((coursesRaw.charAt(i) == ';') || (i == (coursesRaw.length() - 1))) {
-                if (i == (coursesRaw.length() - 1))
+        boolean moreThanZero = false;
+
+        if (coursesRaw != null && coursesRaw.length() > 0) {
+            for (int i = 0; i < coursesRaw.length(); i++) {
+                if ((coursesRaw.charAt(i) == ';') || (i == (coursesRaw.length() - 1))) {
+                    if (i == (coursesRaw.length() - 1))
+                        buffer = buffer + coursesRaw.charAt(i);
+                    extraArguments.add(databaseHelper.COL_3 + " = '" + buffer.trim() + "' COLLATE NOCASE");
+                    buffer = "";
+                } else {
                     buffer = buffer + coursesRaw.charAt(i);
-                extraArguments.add(databaseHelper.COL_3 + " = '" + buffer + "'");
-                buffer = "";
-            } else {
-                buffer = buffer + coursesRaw.charAt(i);
+                }
             }
+            moreThanZero = true;
+        } else {
+            moreThanZero = false;
         }
 
-        boolean moreThanZero = false;
         String extraArgumentsSQL = "";
-        if(extraArguments.size() != 0) {
-            extraArgumentsSQL = " and (";
-            moreThanZero = true;
+
+        if (moreThanZero) {
+            if (extraArguments.size() > 0)
+                if (extraArguments != null) {
+                    extraArgumentsSQL = " and (";
+                    moreThanZero = true;
+                }
+                else
+                    moreThanZero = false;
+            else
+                moreThanZero = false;
         }
 
         for(int i = 0; i < extraArguments.size(); i++) {
@@ -189,9 +203,9 @@ public class ScheduleHandler {
                 return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME2 + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'" + extraArgumentsSQL + ")");
         } else {
             if (index == 1)
-                return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'" + extraArgumentsSQL);
+                return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'"/* + extraArgumentsSQL*/);
             else
-                return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME2 + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'" + extraArgumentsSQL);
+                return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME2 + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'"/* + extraArgumentsSQL*/);
         }
     }
 

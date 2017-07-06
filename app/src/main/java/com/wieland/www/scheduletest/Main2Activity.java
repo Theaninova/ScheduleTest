@@ -1,17 +1,23 @@
 package com.wieland.www.scheduletest;
 
 import android.app.AlertDialog;
-import android.app.Fragment;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -21,18 +27,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.TabHost;
-import android.widget.TabWidget;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import org.jsoup.nodes.Document;
-
 import java.io.IOException;
-import java.sql.Ref;
 import java.util.Objects;
 
 //TODO: wire the OnScrollListener from the ListView manually http://nlopez.io/swiperefreshlayout-with-listview-done-right/
@@ -110,7 +107,7 @@ public class Main2Activity extends AppCompatActivity
         }
 
         //SET TAB TEXT
-        String putIn1 = "";
+        String putIn1;
         if (Schedule.getDate(1, this).contains("erscheint"))
             putIn1 = "Nicht verfügbar.";
         else
@@ -118,6 +115,7 @@ public class Main2Activity extends AppCompatActivity
 
         tabLayout.getTabAt(0).setText(putIn1); //setting Tab Title (Date)
 
+        //noinspection UnusedAssignment
         putIn1 = "";
         if (Schedule.getDate(2, this).contains("erscheint"))
             putIn1 = "Nicht verfügbar.";
@@ -135,6 +133,34 @@ public class Main2Activity extends AppCompatActivity
             navigationView.setCheckedItem(R.id.nav_slideshow);
         else
             navigationView.setCheckedItem(R.id.nav_news);
+
+        StartNotificationService startNotificationService = new StartNotificationService(this);
+        startNotificationService.execute();
+    }
+
+    public class StartNotificationService extends AsyncTask<Void, Void, Boolean> {
+        Context context;
+
+        public StartNotificationService(Context context) {
+            this.context = context;
+        }
+
+        public Boolean doInBackground(Void... params) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { //Job Scheduler requires API 21+
+                JobScheduler jobScheduler = (JobScheduler) context.getSystemService(context.JOB_SCHEDULER_SERVICE);
+                JobInfo.Builder builder = new JobInfo.Builder(1,
+                        new ComponentName(getPackageName(),
+                                BackgroundSync.class.getName()));
+                builder.setPeriodic(15 * 60 * 1000);//15 minutes
+                builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+                if(jobScheduler.schedule(builder.build()) <= 0) {
+                    Toast.makeText(getApplicationContext(),
+                            "Fail", Toast.LENGTH_SHORT)
+                            .show();
+                }
+            }
+            return true;
+        }
     }
 
     public void onRefreshed() {
@@ -304,8 +330,8 @@ public class Main2Activity extends AppCompatActivity
     public class Refresh extends AsyncTask<Void, Void, Boolean> {
         private final Context context;
         private IOException e;
-        private String compare1;
-        private String compare2;
+        private final String compare1;
+        private final String compare2;
 
         Refresh(Context context, String compare1, String compare2) {
             this.context = context;
@@ -335,13 +361,14 @@ public class Main2Activity extends AppCompatActivity
                     Toast toast = Toast.makeText(this.context, "Keine Verbindung möglich.", Toast.LENGTH_SHORT);
                     toast.show();
                 }
-            }
-            else if(Objects.equals(compare1, compare3) && Objects.equals(compare2, compare4)) {
-                Toast toast = Toast.makeText(context, "Plan ist bereits aktuell."/*: " + Schedule.getUpdateDate(1, context)*/, Toast.LENGTH_LONG);
-                toast.show();
-            } else {
-                Toast toast = Toast.makeText(context, "Neuer Plan geladen: " + Schedule.getUpdateDate(1, context), Toast.LENGTH_LONG);
-                toast.show();
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { //.equals() causes crash on <4.0 devices
+                if(Objects.equals(compare1, compare3) && Objects.equals(compare2, compare4)) {
+                    Toast toast = Toast.makeText(context, "Plan ist bereits aktuell."/*: " + Schedule.getUpdateDate(1, context)*/, Toast.LENGTH_LONG);
+                    toast.show();
+                } else {
+                    Toast toast = Toast.makeText(context, "Neuer Plan geladen: " + Schedule.getUpdateDate(1, context), Toast.LENGTH_LONG);
+                    toast.show();
+                }
             }
 
             String tab1Tag = tab1.getTag();
