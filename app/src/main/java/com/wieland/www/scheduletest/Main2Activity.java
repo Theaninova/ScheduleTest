@@ -18,6 +18,7 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -72,7 +73,6 @@ public class Main2Activity extends AppCompatActivity
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-                onRefresh();
             }
         });
 
@@ -84,27 +84,6 @@ public class Main2Activity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-        try {
-            Schedule.refresh(getApplicationContext());
-        } catch (IOException e) {
-            if (e.getMessage() == "HTTP error fetching URL") {
-                Intent intent = new Intent(this, LoginActivity.class);
-                startActivity(intent);
-            } else {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-
-                alertDialogBuilder.setTitle("Verbindungsfehler");
-                alertDialogBuilder.setMessage("Gespeicherter Plan von " + Schedule.getDate(1, getApplicationContext()) + " und " + Schedule.getDate(2, getApplicationContext()) + " wird geladen. Der Plan wurde auf der Webseite zuletzt am " + Schedule.getUpdateDate(1, this) + " aktualisiert.");
-                alertDialogBuilder.setCancelable(false);
-                alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                    }
-                });
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
-            }
-        }
 
         //SET TAB TEXT
         String putIn1;
@@ -134,18 +113,57 @@ public class Main2Activity extends AppCompatActivity
         else
             navigationView.setCheckedItem(R.id.nav_news);
 
+        StartupRefresh startupRefresh = new StartupRefresh(this);
+        startupRefresh.startLoading();
+
         StartNotificationService startNotificationService = new StartNotificationService(this);
-        startNotificationService.execute();
+        startNotificationService.startLoading();
     }
 
-    public class StartNotificationService extends AsyncTask<Void, Void, Boolean> {
+    public class StartupRefresh extends AsyncTaskLoader<Boolean> {
         Context context;
 
-        public StartNotificationService(Context context) {
+        public StartupRefresh(Context context) {
+            super(context);
             this.context = context;
         }
 
-        public Boolean doInBackground(Void... params) {
+        @Override
+        public Boolean loadInBackground() {
+            try {
+                Schedule.refresh(getApplicationContext());
+            } catch (IOException e) {
+                if (e.getMessage() == "HTTP error fetching URL") {
+                    Intent intent = new Intent(context, LoginActivity.class);
+                    startActivity(intent);
+                } else {
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+
+                    alertDialogBuilder.setTitle("Verbindungsfehler");
+                    alertDialogBuilder.setMessage("Gespeicherter Plan von " + Schedule.getDate(1, getApplicationContext()) + " und " + Schedule.getDate(2, getApplicationContext()) + " wird geladen. Der Plan wurde auf der Webseite zuletzt am " + Schedule.getUpdateDate(1, context) + " aktualisiert.");
+                    alertDialogBuilder.setCancelable(false);
+                    alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                        }
+                    });
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+                    alertDialog.show();
+                }
+            }
+            return true;
+        }
+    }
+
+    public class StartNotificationService extends AsyncTaskLoader<Boolean> {
+        Context context;
+
+        public StartNotificationService(Context context) {
+            super(context);
+            this.context = context;
+        }
+
+        @Override
+        public Boolean loadInBackground() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { //Job Scheduler requires API 21+
                 JobScheduler jobScheduler = (JobScheduler) context.getSystemService(context.JOB_SCHEDULER_SERVICE);
                 JobInfo.Builder builder = new JobInfo.Builder(1,

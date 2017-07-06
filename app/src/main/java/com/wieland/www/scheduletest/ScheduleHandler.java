@@ -317,7 +317,12 @@ public class ScheduleHandler {
     }
 
     private String getColoredSpanned(String text, String color) {
-        String input = "<font color=" + color + ">" + text + "</font>";
+        SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
+        String input;
+        if (pref.getBoolean(SettingsActivity.COLORS_ENABLED, true))
+            input = "<font color=" + color + ">" + text + "</font>";
+        else
+            input = text;
         return input;
     }
 }

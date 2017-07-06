@@ -31,6 +31,20 @@ public class BackgroundSync extends JobService {
 
         @Override
         public boolean handleMessage( Message msg ) {
+            NotificationAsyncTask notificationAsyncTask = new NotificationAsyncTask();
+            notificationAsyncTask.execute();
+
+            jobFinished( (JobParameters) msg.obj, false );
+            return true;
+        }
+
+    } );
+
+    class NotificationAsyncTask extends AsyncTask<Void, Void, Boolean> {
+        NotificationAsyncTask() {}
+
+        @Override
+        public Boolean doInBackground(Void... params) {
             String compare1 = Schedule.getUpdateDate(1, getApplicationContext());
             String compare2 = Schedule.getUpdateDate(2, getApplicationContext());
 
@@ -81,11 +95,9 @@ public class BackgroundSync extends JobService {
                         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 mNotificationManager.notify(1, mBuilder.build());
             }
-            jobFinished( (JobParameters) msg.obj, false );
             return true;
         }
-
-    } );
+    }
 
     @Override
     public boolean onStopJob(JobParameters params) {

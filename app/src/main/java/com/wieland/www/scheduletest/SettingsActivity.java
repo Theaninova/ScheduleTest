@@ -13,9 +13,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -28,12 +30,13 @@ public class SettingsActivity extends AppCompatActivity {
     Button confirm;
     Context context;
     ArrayList<String> classesList, coursesList;
-
+    Switch aSwitch;
     ListView listClasses, listCourses;
 
     public static final String CLASSES_NAME = "Classes";
     public static final String COURSES_NAME = "Courses";
     public static final String CUSTOMSQL_NAME = "CustomSQL";
+    public static final String COLORS_ENABLED = "Colors_Enabled";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,12 +47,25 @@ public class SettingsActivity extends AppCompatActivity {
         confirm = (Button) findViewById(R.id.buttonSettingsConfirm);
         context = this;
 
+        aSwitch = (Switch) findViewById(R.id.switch1);
+        aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
+                SharedPreferences.Editor editor = pref.edit();
+
+                editor.putBoolean(COLORS_ENABLED, aSwitch.isChecked());
+                editor.commit();
+            }
+        });
+
         listClasses = (ListView) findViewById(R.id.listClasses);
         listCourses = (ListView) findViewById(R.id.listCourses);
 
         final SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
         classesList = unscrambleRaw(pref.getString(CLASSES_NAME, ""));
         coursesList = unscrambleRaw(pref.getString(COURSES_NAME, ""));
+        aSwitch.setChecked(pref.getBoolean(COLORS_ENABLED, true));
 
         listClasses.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
                 android.R.id.text1, classesList));
