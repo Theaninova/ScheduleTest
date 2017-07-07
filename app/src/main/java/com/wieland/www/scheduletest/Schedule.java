@@ -22,6 +22,8 @@ import static android.content.Context.MODE_PRIVATE;
 //notice that Jsoup is a separate library which has to be put in the library folder in your Android Studio. You can find the libary at https://jsoup.org/download I used jsoup-1.10.2.jar core library
 
 public class Schedule {
+    public final static String IS_ACTIVE = "is_active";
+
     /**
      * @param index 1 means Today and 2 means Tomorrow
      * @return returns the Schedule at index as a Jsoup Document
@@ -45,6 +47,8 @@ public class Schedule {
         SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
         DatabaseHelper databaseHelper = new DatabaseHelper(context);
         SharedPreferences.Editor editor = pref.edit();
+        editor.putBoolean(IS_ACTIVE, true);
+        editor.commit();
 
         String username = pref.getString("set_username", "-1");
         String password = pref.getString("set_password", "-1");
@@ -129,8 +133,7 @@ public class Schedule {
         out = doc.select("h1").text();
         editor.putString("Day2_UpdateDate", out);
         //END SAVING DATES
-
-
+        editor.putBoolean(IS_ACTIVE, false);
         editor.commit();
     }
 

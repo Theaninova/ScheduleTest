@@ -7,6 +7,7 @@ import android.app.job.JobParameters;
 import android.app.job.JobService;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
@@ -31,26 +32,11 @@ public class BackgroundSync extends JobService {
 
         @Override
         public boolean handleMessage( Message msg ) {
-            NotificationAsyncTask notificationAsyncTask = new NotificationAsyncTask();
-            notificationAsyncTask.execute();
-
-            jobFinished( (JobParameters) msg.obj, false );
-            return true;
-        }
-
-    } );
-
-    class NotificationAsyncTask extends AsyncTask<Void, Void, Boolean> {
-        NotificationAsyncTask() {}
-
-        @Override
-        public Boolean doInBackground(Void... params) {
             String compare1 = Schedule.getUpdateDate(1, getApplicationContext());
             String compare2 = Schedule.getUpdateDate(2, getApplicationContext());
 
-            try {
-                Schedule.refresh(getApplicationContext());
-            } catch (java.io.IOException e) {}
+            NotificationAsyncTask notificationAsyncTask = new NotificationAsyncTask(getApplicationContext());
+            notificationAsyncTask.execute();
 
             String compare3 = Schedule.getUpdateDate(1, getApplicationContext());
             String compare4 = Schedule.getUpdateDate(2, getApplicationContext());
@@ -95,6 +81,35 @@ public class BackgroundSync extends JobService {
                         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 mNotificationManager.notify(1, mBuilder.build());
             }
+
+            jobFinished( (JobParameters) msg.obj, false );
+            return true;
+        }
+
+    } );
+
+    class NotificationAsyncTask extends AsyncTask<Void, Void, Boolean> {
+        Context context;
+
+        NotificationAsyncTask(Context context) {this.context = context;}
+
+        @Override
+        public Boolean doInBackground(Void... params) {
+            SharedPreferences pref = getSharedPreferences("Tralala", MODE_PRIVATE);
+
+            int counter = 0;
+            while (pref.getBoolean(Schedule.IS_ACTIVE, false)) {
+                if (counter > 6)
+                    pref.edit().putBoolean(Schedule.IS_ACTIVE, false).commit();
+                try {
+                    Thread.sleep(1000);
+                } catch (java.lang.InterruptedException e) {}
+                counter++;
+            }
+
+            try {
+                Schedule.refresh(context);
+            } catch (java.io.IOException e) {}
             return true;
         }
     }

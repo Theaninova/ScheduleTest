@@ -119,6 +119,22 @@ public class Main2Activity extends AppCompatActivity implements NavigationView.O
 
         Bundle loaderBndl = new Bundle();
         final Context context = this;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { //Job Scheduler requires API 21+
+            JobScheduler jobScheduler = (JobScheduler) context.getSystemService(context.JOB_SCHEDULER_SERVICE);
+            jobScheduler.cancelAll();
+            JobInfo.Builder builder = new JobInfo.Builder(1,
+                    new ComponentName(getPackageName(),
+                            BackgroundSync.class.getName()));
+            builder.setPeriodic(15 * 60 * 1000);//15 minutes
+            if (jobScheduler.schedule(builder.build()) <= 0) {
+                Toast.makeText(getApplicationContext(),
+                        "Fail", Toast.LENGTH_SHORT)
+                        .show();
+            }
+        }
+
+        getSupportLoaderManager().destroyLoader(1);
         getSupportLoaderManager().initLoader(1, loaderBndl, new LoaderManager.LoaderCallbacks<ArrayList<String>>() {
             @Override
             public Loader<ArrayList<String>> onCreateLoader(final int id, final Bundle args) {
@@ -151,7 +167,8 @@ public class Main2Activity extends AppCompatActivity implements NavigationView.O
                         AlertDialog alertDialog = alertDialogBuilder.create();
                         alertDialog.show();
                     }
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { //.equals() causes crash on <4.0 devices
                     if (Objects.equals(compare1, compare3) && Objects.equals(compare2, compare4)) {
@@ -180,37 +197,31 @@ public class Main2Activity extends AppCompatActivity implements NavigationView.O
                         fragmentTransaction2.commit();
                     }
                 } else {
-                        String tab1Tag = tab1.getTag();
-                        String tab2Tag = tab2.getTag();
+                    String tab1Tag = tab1.getTag();
+                    String tab2Tag = tab2.getTag();
 
-                        android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                        fragmentTransaction.remove(tab1);
-                        fragmentTransaction.commit();
-                        getSupportFragmentManager().executePendingTransactions();
-                        fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                        fragmentTransaction.add(tab1, tab1Tag);
-                        fragmentTransaction.commit();
+                    android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction.remove(tab1);
+                    fragmentTransaction.commit();
+                    getSupportFragmentManager().executePendingTransactions();
+                    fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction.add(tab1, tab1Tag);
+                    fragmentTransaction.commit();
 
-                        android.support.v4.app.FragmentTransaction fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
-                        fragmentTransaction2.remove(tab2);
-                        fragmentTransaction2.commit();
-                        getSupportFragmentManager().executePendingTransactions();
-                        fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
-                        fragmentTransaction2.add(tab2, tab2Tag);
-                        fragmentTransaction2.commit();
-                    }
+                    android.support.v4.app.FragmentTransaction fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction2.remove(tab2);
+                    fragmentTransaction2.commit();
+                    getSupportFragmentManager().executePendingTransactions();
+                    fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction2.add(tab2, tab2Tag);
+                    fragmentTransaction2.commit();
+                }
             }
 
             @Override
             public void onLoaderReset(final Loader<ArrayList<String>> loader) {
             }
         }).forceLoad();
-
-        /*RefreshLoader refreshLoader = new RefreshLoader(this);
-        refreshLoader.startLoading();*/
-
-        StartNotificationService startNotificationService = new StartNotificationService(this);
-        startNotificationService.startLoading();
     }
 
     public static class RefreshLoader extends AsyncTaskLoader<ArrayList<String>> {
@@ -231,6 +242,19 @@ public class Main2Activity extends AppCompatActivity implements NavigationView.O
         public ArrayList<String> loadInBackground() {
             out.add(compare1);
             out.add(compare2);
+            SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
+
+            int counter = 0;
+            while (pref.getBoolean(Schedule.IS_ACTIVE, false)) {
+                if (counter > 6)
+                    pref.edit().putBoolean(Schedule.IS_ACTIVE, false).commit();
+                try {
+                    Thread.sleep(1000);
+                } catch (java.lang.InterruptedException e) {
+                }
+                counter++;
+            }
+
             try {
                 Schedule.refresh(context);
             } catch (IOException e) {
@@ -241,33 +265,6 @@ public class Main2Activity extends AppCompatActivity implements NavigationView.O
                 }
             }
             return out;
-        }
-    }
-
-    public class StartNotificationService extends AsyncTaskLoader<Boolean> {
-        Context context;
-
-        public StartNotificationService(Context context) {
-            super(context);
-            this.context = context;
-        }
-
-        @Override
-        public Boolean loadInBackground() {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { //Job Scheduler requires API 21+
-                JobScheduler jobScheduler = (JobScheduler) context.getSystemService(context.JOB_SCHEDULER_SERVICE);
-                JobInfo.Builder builder = new JobInfo.Builder(1,
-                        new ComponentName(getPackageName(),
-                                BackgroundSync.class.getName()));
-                builder.setPeriodic(15 * 60 * 1000);//15 minutes
-                builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
-                if (jobScheduler.schedule(builder.build()) <= 0) {
-                    Toast.makeText(getApplicationContext(),
-                            "Fail", Toast.LENGTH_SHORT)
-                            .show();
-                }
-            }
-            return true;
         }
     }
 
