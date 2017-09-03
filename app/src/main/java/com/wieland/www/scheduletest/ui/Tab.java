@@ -1,12 +1,9 @@
-package com.wieland.www.scheduletest;
+package com.wieland.www.scheduletest.ui;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Looper;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -17,9 +14,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import org.jsoup.nodes.Document;
+import com.wieland.www.scheduletest.R;
+import com.wieland.www.scheduletest.schedule.ScheduleHandler;
 
 import java.util.ArrayList;
 
@@ -29,44 +26,48 @@ import static android.content.Context.MODE_PRIVATE;
  * Created by Wieland on 07.05.2017.
  */
 
-public class Tab2 extends Fragment {
+public class Tab extends Fragment {
 
     SwipeRefreshLayout SwipeRefresh;
     RecyclerView myList;
     Context context;
+    View view;
+    int index;
 
-    OnHeadlineSelectedListener2 mCallback;
-
-    int index = 2;
+    OnHeadlineSelectedListener mCallback;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.content_main3, container, false);
+        view = inflater.inflate(R.layout.content_main, container, false);
+        return view;
     }
 
-
+    public void setIndex(int index) {
+        this.index = index;
+    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        SwipeRefresh = (SwipeRefreshLayout) getActivity().findViewById(R.id.swiperefresh3);
-        myList = (RecyclerView) getActivity().findViewById(R.id.theListOfDoom3);
+        SwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh2);
+        myList = (RecyclerView) view.findViewById(R.id.theListOfDoom);
         SwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mCallback.onRefreshed2();
+                mCallback.onRefreshed();
             }
         });
 
+
         context = getActivity();
-        SetTextTask setText = new SetTextTask(Schedule.getSchedule(index, context), index, context);
+        SetTextTask setText = new SetTextTask(index, context);
         setText.execute();
     }
 
     // Container Activity must implement this interface
-    public interface OnHeadlineSelectedListener2 {
-        public void onRefreshed2();
+    public interface OnHeadlineSelectedListener {
+        public void onRefreshed();
     }
 
     @Override
@@ -76,7 +77,7 @@ public class Tab2 extends Fragment {
         // This makes sure that the container activity has implemented
         // the callback interface. If not, it throws an exception
         try {
-            mCallback = (OnHeadlineSelectedListener2) activity;
+            mCallback = (OnHeadlineSelectedListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement OnHeadlineSelectedListener");
@@ -85,14 +86,13 @@ public class Tab2 extends Fragment {
 
 
     public class SetTextTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final Document doc;
         private final Context context;
         private Layout_Row adapter;
+        private int index;
 
-        SetTextTask (Document doc, int index, Context context) {
-            this.doc = doc;
+        SetTextTask (int index, Context context) {
             this.context = context;
+            this.index = index;
         }
 
         @Override
@@ -103,11 +103,11 @@ public class Tab2 extends Fragment {
 
             ScheduleHandler myHandler = new ScheduleHandler(index, context);
             SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
-            if(pref.getInt("customizedLayout2", 1) == 2)
+            if(pref.getInt("customizedLayout2", 1) == 2) {
                 try {
                     willBeSet = myHandler.getClassListPersonalized();
                 } catch (Exception e) {}
-            else if (pref.getInt("customizedLayout2", 1) == 1)
+            } else if (pref.getInt("customizedLayout2", 1) == 1)
                 willBeSet = myHandler.getClassList();
             else
                 try {
@@ -115,11 +115,11 @@ public class Tab2 extends Fragment {
                 } catch (Exception e) {}
 
             for (int i = 0; i < willBeSet.size(); i++) {
-                if(pref.getInt("customizedLayout2", 1) == 2)
+                if(pref.getInt("customizedLayout2", 1) == 2) {
                     try {
                         listInList.add(myHandler.getClassInfoPersonalized(willBeSet.get(i)));
                     } catch (Exception e) {}
-                else if (pref.getInt("customizedLayout2", 1) == 1)
+                } else if (pref.getInt("customizedLayout2", 1) == 1)
                     listInList.add(myHandler.getClassInfo(willBeSet.get(i)));
                 else
                     try {
@@ -147,8 +147,7 @@ public class Tab2 extends Fragment {
             View mHeaderView = menu2.getHeaderView(0);
             TextView username_view = (TextView) mHeaderView.findViewById(R.id.textView_username);
             username_view.setText(pref.getString("set_username", "[Nutzername]"));
-
-            //setTitle(Schedule.getDate(this.index, this.context));
+            //setTitle(Schedule.getDate(index, this.context));
             SwipeRefresh.setRefreshing(false);
         }
     }

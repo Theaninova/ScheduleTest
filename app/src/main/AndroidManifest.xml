@@ -15,21 +15,21 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".LoginActivity"
+            android:name=".activities.LoginActivity"
             android:label="@string/title_activity_login" />
         <activity
-            android:name=".Main2Activity"
+            android:name=".activities.MainActivity"
             android:label="@string/mainTitle_date"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name=".activities.SettingsActivity"
             android:label="Einstellungen"
             android:theme="@style/AppTheme"
-            android:parentActivityName=".Main2Activity">
+            android:parentActivityName=".activities.MainActivity">
         </activity>
         <activity
-            android:name=".SplashActivity"
+            android:name=".activities.SplashActivity"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -41,7 +41,7 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity>
-        <service android:name=".BackgroundSync"
+        <service android:name=".schedule.BackgroundSync"
             android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
 

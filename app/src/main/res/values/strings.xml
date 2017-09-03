@@ -34,6 +34,8 @@
 
     <string name="title_activity_detailed__view">Detailed_View</string>
 
+    <string name="bolean_first_start">FirstStart</string>
+
     <string name="mainTitle_date">[date]</string>
 
     <string name="nutzungsbedigungen_url">http://www.romain-rolland-oberschule.de/app/docs/nutzungsbedingungen.html</string>

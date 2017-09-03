@@ -1,10 +1,11 @@
-package com.wieland.www.scheduletest;
+package com.wieland.www.scheduletest.activities;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -27,7 +28,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import org.jsoup.nodes.Document;
+import com.wieland.www.scheduletest.R;
+import com.wieland.www.scheduletest.schedule.Schedule;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -119,8 +121,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // form field with an error.
             focusView.requestFocus();
         } else {
-
-
+            final Context context = this;
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
 
             alertDialogBuilder.setTitle("Hinweis");
@@ -128,6 +129,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             alertDialogBuilder.setCancelable(false);
             alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
+                    //Notify Users of Android Version <= 4.4
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                        AlertDialog.Builder alertDialogBuilder2 = new AlertDialog.Builder(context);
+                        alertDialogBuilder2.setTitle("Hinweis");
+                        alertDialogBuilder2.setMessage("Du scheinst eine sehr alte Android Version zu haben. Beachte, dass manche Features nicht verfügbar sein werden. Der Plan muss nach jedem Start manuell aktualisiert werden.");
+                        alertDialogBuilder2.setCancelable(false);
+                        alertDialogBuilder2.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+
+                            }
+                        });
+                        AlertDialog alertDialog2 = alertDialogBuilder2.create();
+                        alertDialog2.show();
+                    }
 
                     showProgress(true);
                     mAuthTask = new UserLoginTask(email, password);
@@ -273,6 +288,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
+                SharedPreferences pref = getSharedPreferences("Tralala", MODE_PRIVATE);
+                pref.edit().putBoolean("FirstStart", false).commit();
                 Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
                 startActivity(intent);
             } else {

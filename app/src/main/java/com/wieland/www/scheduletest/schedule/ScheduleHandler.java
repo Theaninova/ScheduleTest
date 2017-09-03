@@ -1,14 +1,12 @@
-package com.wieland.www.scheduletest;
+package com.wieland.www.scheduletest.schedule;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.Html;
-import android.text.Spanned;
 
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
+import com.wieland.www.scheduletest.activities.SettingsActivity;
 
 import java.util.ArrayList;
 
@@ -39,10 +37,9 @@ public class ScheduleHandler {
 
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
         Cursor res;
-        if (index == 1)
-            res = db.rawQuery("SELECT " + databaseHelper.COL_1 + " FROM " + databaseHelper.TABLE_NAME + " GROUP BY " + databaseHelper.COL_1, null);
-        else
-            res = db.rawQuery("SELECT " + databaseHelper.COL_1 + " FROM " + databaseHelper.TABLE_NAME2 + " GROUP BY " + databaseHelper.COL_1, null);
+
+        res = db.rawQuery("SELECT " + databaseHelper.COL_1 + " FROM " + databaseHelper.TABLE_NAME + index + " GROUP BY " + databaseHelper.COL_1, null);
+
         while (res.moveToNext()) {
             outputList.add(res.getString(0));
         }
@@ -75,10 +72,8 @@ public class ScheduleHandler {
         SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
         ArrayList<String> outputList = new ArrayList<>();
 
-        if (index == 1)
-            res = db.rawQuery("SELECT kl FROM " + databaseHelper.TABLE_NAME  + " WHERE " + pref.getString(SettingsActivity.CUSTOMSQL_NAME, "") + " GROUP BY " + databaseHelper.COL_1, null);
-        else
-            res = db.rawQuery("SELECT kl FROM " + databaseHelper.TABLE_NAME2 + " WHERE " + pref.getString(SettingsActivity.CUSTOMSQL_NAME, "") + " GROUP BY "  + databaseHelper.COL_1, null);
+        res = db.rawQuery("SELECT kl FROM " + databaseHelper.TABLE_NAME + index  + " WHERE " + pref.getString(SettingsActivity.CUSTOMSQL_NAME, "") + " GROUP BY " + databaseHelper.COL_1, null);
+
         while (res.moveToNext()) {
             outputList.add(res.getString(0));
         }
@@ -89,10 +84,7 @@ public class ScheduleHandler {
     public ArrayList<android.text.Spanned> getClassInfoCustom(String thisClass) throws Exception {
         SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
 
-        if (index == 1)
-            return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME + " WHERE (" + pref.getString(SettingsActivity.CUSTOMSQL_NAME, "")+ ") and " + databaseHelper.COL_1 + " = '" + thisClass + "'");
-        else
-            return  getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME2 + " WHERE (" + pref.getString(SettingsActivity.CUSTOMSQL_NAME, "")+ ") and " + databaseHelper.COL_1 + " = '" + thisClass + "'");
+        return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME + index + " WHERE (" + pref.getString(SettingsActivity.CUSTOMSQL_NAME, "")+ ") and " + databaseHelper.COL_1 + " = '" + thisClass + "'");
     }
 
     public ArrayList<String> getClassListPersonalized() {
@@ -128,10 +120,8 @@ public class ScheduleHandler {
                 extraArgumentsSQL = extraArgumentsSQL + " or ";
         }
 
-        if (index == 1)
-            res = db.rawQuery("SELECT kl FROM " + databaseHelper.TABLE_NAME  + extraArgumentsSQL + " GROUP BY " + databaseHelper.COL_1, null);
-        else
-            res = db.rawQuery("SELECT kl FROM " + databaseHelper.TABLE_NAME2 + extraArgumentsSQL + " GROUP BY "  + databaseHelper.COL_1, null);
+        res = db.rawQuery("SELECT kl FROM " + databaseHelper.TABLE_NAME + index  + extraArgumentsSQL + " GROUP BY " + databaseHelper.COL_1, null);
+
         while (res.moveToNext()) {
             outputList.add(res.getString(0));
         }
@@ -165,7 +155,7 @@ public class ScheduleHandler {
                 if ((coursesRaw.charAt(i) == ';') || (i == (coursesRaw.length() - 1))) {
                     if (i == (coursesRaw.length() - 1))
                         buffer = buffer + coursesRaw.charAt(i);
-                    extraArguments.add(databaseHelper.COL_3 + " = '" + buffer.trim() + "' COLLATE NOCASE");
+                    extraArguments.add(databaseHelper.COL_3 + " = '" + buffer.trim() + "' COLLATE NOCASE or " + databaseHelper.COL_6 + " = '" + buffer.trim() + "' COLLATE NOCASE");
                     buffer = "";
                 } else {
                     buffer = buffer + coursesRaw.charAt(i);
@@ -197,23 +187,14 @@ public class ScheduleHandler {
         }
 
         if(moreThanZero) {
-            if (index == 1)
-                return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'" + extraArgumentsSQL + ")");
-            else
-                return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME2 + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'" + extraArgumentsSQL + ")");
+            return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME + index + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'" + extraArgumentsSQL + ")");
         } else {
-            if (index == 1)
-                return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'"/* + extraArgumentsSQL*/);
-            else
-                return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME2 + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'"/* + extraArgumentsSQL*/);
+            return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME + index + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'"/* + extraArgumentsSQL*/);
         }
     }
 
     public ArrayList<android.text.Spanned> getClassInfo(String thisClass) {
-        if (index == 1)
-            return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'");
-        else
-            return  getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME2 + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'");
+        return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME + index + " WHERE " + databaseHelper.COL_1 + " = '" + thisClass + "'");
     }
 
     /**
@@ -233,17 +214,18 @@ public class ScheduleHandler {
 
         ArrayList<android.text.Spanned> outList = new ArrayList<>();
 
+        String currentLesson = "x";
+
         while (res.moveToNext()) {
             forInfo = true;
             String output = "";
 
-            if (res.getString(2).contains("\u00A0"))
+            if (res.getString(2).contains(currentLesson))
                 output = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-            else if (res.getString(2).contains("10"))
+            else if (currentLesson.contains("10"))
                 output = res.getString(2) + ".&nbsp;";
             else
                 output = res.getString(2) + ".&nbsp;&nbsp;";
-
 
             if (res.getString(6).contains("\u00A0")) {
                 if (res.getString(3).contains("\u00A0"))
@@ -293,8 +275,10 @@ public class ScheduleHandler {
             }
 
             if (res.getString(8).contains("verschoben")) {
-                if (res.getString(2).contains("\u00A0"))
+                if (res.getString(2).contains(currentLesson))
                     output = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned(res.getString(3), "#008000") + " wird " + getColoredSpanned(res.getString(8), "#8B0000");
+                else if (currentLesson.contains("10"))
+                    output = res.getString(2) + ".&nbsp;" + getColoredSpanned(res.getString(3), "#008000") + " wird " + getColoredSpanned(res.getString(8), "#8B0000");
                 else
                     output = res.getString(2) + ".&nbsp;&nbsp;" + getColoredSpanned(res.getString(3), "#008000") + " wird " + getColoredSpanned(res.getString(8), "#8B0000");  //[Fach] wird [verschoben auf Datum]
             } else if (res.getString(8).contains("anstatt")) {
@@ -309,6 +293,9 @@ public class ScheduleHandler {
             } else if (!res.getString(8).contains("\u00A0")) {
                 output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned(res.getString(8), "grey");
             }
+
+            if (!res.getString(2).contains("&nbsp;"))
+                currentLesson = res.getString(2);
 
             outList.add(Html.fromHtml(output));
         }

@@ -8,7 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="0dp"
-    tools:context="com.wieland.www.scheduletest.Layout_Row">
+    tools:context="com.wieland.www.scheduletest.ui.Layout_Row">
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"

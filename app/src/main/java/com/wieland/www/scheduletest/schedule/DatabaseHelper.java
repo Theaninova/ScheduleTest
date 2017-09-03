@@ -1,9 +1,11 @@
-package com.wieland.www.scheduletest;
+package com.wieland.www.scheduletest.schedule;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import java.sql.ResultSet;
 
 /**
  * Created by wulka on 20.06.2017.
@@ -11,8 +13,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "schedule.db";
-    public static final String TABLE_NAME = "day1";
-    public static final String TABLE_NAME2 = "day2";
+    public static final String TABLE_NAME = "day";
     public static final String COL_1 = "kl";
     public static final String COL_2 = "std";
     public static final String COL_3 = "fach";
@@ -32,17 +33,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table " + TABLE_NAME + "(ID INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + COL_1 + " TEXT,"
-                + COL_2 + " TEXT,"
-                + COL_3 + " TEXT,"
-                + COL_4 + " TEXT,"
-                + COL_5 + " TEXT,"
-                + COL_6 + " TEXT,"
-                + COL_7 + " TEXT,"
-                + COL_8 + " TEXT)");
-
-        db.execSQL("create table " + TABLE_NAME2 + "(ID INTEGER PRIMARY KEY AUTOINCREMENT,"
+        db.execSQL("create table if not exists " + TABLE_NAME + 1 + "(ID INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + COL_1 + " TEXT,"
                 + COL_2 + " TEXT,"
                 + COL_3 + " TEXT,"
@@ -56,7 +47,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME2);
         onCreate(db);
     }
 
@@ -75,10 +65,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         long result;
 
-        if (tablenumber == 1)
-            result = db.insert(TABLE_NAME, null, contentValues);
-        else //if (tablenumber == 2)
-            result = db.insert(TABLE_NAME2, null, contentValues);
+        db.execSQL("create table if not exists " + TABLE_NAME + tablenumber + "(ID INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + COL_1 + " TEXT,"
+                + COL_2 + " TEXT,"
+                + COL_3 + " TEXT,"
+                + COL_4 + " TEXT,"
+                + COL_5 + " TEXT,"
+                + COL_6 + " TEXT,"
+                + COL_7 + " TEXT,"
+                + COL_8 + " TEXT)");
+
+        result = db.insert(TABLE_NAME + tablenumber, null, contentValues);
 
         if (result == -1)
             return false;

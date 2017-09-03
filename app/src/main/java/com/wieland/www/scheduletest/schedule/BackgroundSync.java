@@ -1,4 +1,4 @@
-package com.wieland.www.scheduletest;
+package com.wieland.www.scheduletest.schedule;
 
 
 import android.app.NotificationManager;
@@ -13,6 +13,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+
+import com.wieland.www.scheduletest.R;
+import com.wieland.www.scheduletest.activities.MainActivity;
+import com.wieland.www.scheduletest.schedule.Schedule;
+import com.wieland.www.scheduletest.schedule.ScheduleHandler;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -52,9 +57,9 @@ public class BackgroundSync extends JobService {
                                 .setContentTitle("Neuer Plan geladen!")
                                 .setContentText("Aktualisierungsdatum des Plans: " + compare3);
 
-                Intent resultIntent = new Intent(getApplicationContext(), Main2Activity.class);
+                Intent resultIntent = new Intent(getApplicationContext(), MainActivity.class);
                 TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
-                stackBuilder.addParentStack(Main2Activity.class);
+                stackBuilder.addParentStack(MainActivity.class);
                 stackBuilder.addNextIntent(resultIntent);
                 PendingIntent resultPendingIntent =
                         stackBuilder.getPendingIntent(
