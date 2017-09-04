@@ -1,6 +1,8 @@
 package com.wieland.www.scheduletest.schedule;
 
 
+import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.job.JobParameters;
@@ -9,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.NotificationCompat;
@@ -53,7 +56,9 @@ public class BackgroundSync extends JobService {
                         new NotificationCompat.Builder(getApplicationContext())
                                 .setSmallIcon(R.drawable.notification_icon)
                                 .setContentTitle("Neuer Plan geladen!")
-                                .setContentText("Aktualisierungsdatum des Plans: " + compare3);
+                                .setContentText("Aktualisierungsdatum des Plans: " + compare3)
+                                .setChannelId("my_channel_01")
+                                .setPriority(Notification.PRIORITY_HIGH);
 
                 Intent resultIntent = new Intent(getApplicationContext(), MainActivity.class);
                 TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
@@ -78,10 +83,19 @@ public class BackgroundSync extends JobService {
                         inboxStyle.addLine(arrayList.get(s).toString());
                     }
                 }
+
                 mBuilder.setStyle(inboxStyle);
 
                 NotificationManager mNotificationManager =
                         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    NotificationChannel channel = new NotificationChannel("my_channel_01",
+                            "Vertretungsplan Aktualisierung",
+                            NotificationManager.IMPORTANCE_HIGH);
+                    mNotificationManager.createNotificationChannel(channel);
+                }
+
                 mNotificationManager.notify(1, mBuilder.build());
             }
 
