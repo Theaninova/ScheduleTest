@@ -37,16 +37,14 @@ public class BackgroundSync extends JobService {
 
         @Override
         public boolean handleMessage( Message msg ) {
-            String compare1 = Schedule.getUpdateDate(1, getApplicationContext());
-            String compare2 = Schedule.getUpdateDate(2, getApplicationContext());
+            String compare1 = Schedule.getUpdateDate(getApplicationContext());
 
             NotificationAsyncTask notificationAsyncTask = new NotificationAsyncTask(getApplicationContext());
             notificationAsyncTask.execute();
 
-            String compare3 = Schedule.getUpdateDate(1, getApplicationContext());
-            String compare4 = Schedule.getUpdateDate(2, getApplicationContext());
+            String compare3 = Schedule.getUpdateDate(getApplicationContext());
 
-            if(!(Objects.equals(compare1, compare3) && Objects.equals(compare2, compare4))) {
+            if(!(Objects.equals(compare1, compare3))) {
                 int tomorrow = 2;
                 if (Schedule.getDate(2, getApplicationContext()).contains("erscheint"))
                     tomorrow = 1;

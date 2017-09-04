@@ -14,7 +14,7 @@ import java.util.ArrayList;
  */
 
 public class PagerAdapter extends FragmentStatePagerAdapter {
-    ArrayList<Tab> tabs;
+    private ArrayList<Tab> tabs;
 
     public PagerAdapter(FragmentManager fm, ArrayList<Tab> tabs) {
         super(fm);
@@ -37,5 +37,6 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
 
     public void setTabs(ArrayList<Tab> tabs) {
         this.tabs = tabs;
+        notifyDataSetChanged();
     }
 }

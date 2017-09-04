@@ -37,6 +37,13 @@
                 android:layout_height="230dp"
                 app:srcCompat="@drawable/logo_login" />
 
+            <Switch
+                android:id="@+id/switch2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:text="Lehreransicht" />
+
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">

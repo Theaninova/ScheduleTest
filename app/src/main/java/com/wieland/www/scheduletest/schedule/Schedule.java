@@ -31,7 +31,7 @@ public class Schedule {
      * @return
      * @throws IOException
      */
-    private static ArrayList<String> getURLs(String login) throws IOException {
+    private static ArrayList<String> getURLs(String login, Context context) throws IOException {
         String URL = "http://www.romain-rolland-gymnasium.eu/schuelerbereich/svplaneinseitig/Index.html";
 
         Document doc = Jsoup
@@ -57,8 +57,9 @@ public class Schedule {
             }
             break;
         }
+        String date = doc.select("h1").text();
+        context.getSharedPreferences("Tralala", MODE_PRIVATE).edit().putString("UpdateDate", date).commit();
 
-        System.out.println("out size: " + out.size());
         return out;
     }
 
@@ -81,7 +82,7 @@ public class Schedule {
         String tmp = username + ":" + password; //":" is needed, a basic html login requires a return in the form "Basic username:password", where the username:password are Base 64 encoded
         String login = new String(Base64.encodeBase64(tmp.getBytes())); //encoding "username:password" Base64
 
-        ArrayList<String> URLs = getURLs(login);
+        ArrayList<String> URLs = getURLs(login, context);
 
         context.deleteDatabase(DatabaseHelper.DATABASE_NAME); //clear database
         boolean success = false; //for checking
@@ -149,9 +150,9 @@ public class Schedule {
         return pref.getString("Day" + index + "_Date", "NOT_EXISTING");
     }
 
-    public static String getUpdateDate(int index, Context context) {
+    public static String getUpdateDate(Context context) {
         SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
-        return pref.getString("Day" + index + "_UpdateDate", "NOT_EXISTING");
+        return pref.getString("UpdateDate", "NOT_EXISTING");
 
     }
 }

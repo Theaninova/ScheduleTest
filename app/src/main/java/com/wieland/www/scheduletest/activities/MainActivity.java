@@ -21,6 +21,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.wieland.www.scheduletest.schedule.BackgroundSync;
@@ -59,6 +60,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
         }
 
+        /*try {
+            Schedule.refresh(this);
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }*/
+
         initTabs();
 
         //Setting up background sync
@@ -70,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     new ComponentName(getPackageName(),
                             BackgroundSync.class.getName()));
             builder.setPeriodic(15 * 60 * 1000);//15 minutes
-            if (jobScheduler.schedule(builder.build()) <= 0) {
+            if (jobScheduler.schedule(builder.build()) <= JobScheduler.RESULT_FAILURE) {
                 Toast.makeText(getApplicationContext(),
                         "Fail", Toast.LENGTH_SHORT)
                         .show();
@@ -131,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        setTitle(Schedule.getUpdateDate(1, this));
+        setTitle(Schedule.getUpdateDate(this));
 
         //checking the last selection of the user (Allgemein, Personalisiert, Custom Query)
         if (pref.getInt("customizedLayout2", 1) == 1)
@@ -143,14 +150,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void onRefreshed() {
-        Refresh refresh = new Refresh(this, Schedule.getUpdateDate(1, this), Schedule.getUpdateDate(2, this));
+        Refresh refresh = new Refresh(this, Schedule.getUpdateDate(this));
         refresh.execute();
     }
 
-    //For each SwipeDownForRefresh on each page one onRefresh is needed, for whatever reason
-    public void onRefreshed2() {
-        Refresh refresh = new Refresh(this, Schedule.getUpdateDate(1, this), Schedule.getUpdateDate(2, this));
-        refresh.execute();
+    private void refreshTabs() {
+        for (Tab tab : tabs) {
+            tab.refresh();
+        }
     }
 
     //For closing App Drawer when pressing back. Othewise the App would close either way
@@ -197,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             editor.putInt("customizedLayout2", 1); //for communicating with the Fragments
             editor.commit();
 
-            initTabs();
+            refreshTabs();
         } else if (id == R.id.nav_news) {
             SharedPreferences pref = this.getSharedPreferences("Tralala", MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
@@ -205,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             editor.putInt("customizedLayout2", 3); //for communicating with the Fragments
             editor.commit();
 
-            initTabs();
+            refreshTabs();
         } else if (id == R.id.nav_slideshow) {
             SharedPreferences pref = this.getSharedPreferences("Tralala", MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
@@ -213,7 +220,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             editor.putInt("customizedLayout2", 2); //for communicating with the Fragments
             editor.commit();
 
-            initTabs();
+            refreshTabs();
         } else if (id == R.id.nav_share) {
             //Let the user send a Email
             Intent i = new Intent(Intent.ACTION_SENDTO);
@@ -230,8 +237,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Uri uri = Uri.parse("http://www.romain-rolland-gymnasium.eu/index.php?id=271");
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             startActivity(intent);
-        } else if (id == R.id.nav_news) {
-
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -243,12 +248,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         private final Context context;
         private IOException e;
         private final String compare1;
-        private final String compare2;
 
-        Refresh(Context context, String compare1, String compare2) {
+        Refresh(Context context, String compare1) {
             this.context = context;
             this.compare1 = compare1;
-            this.compare2 = compare2;
         }
 
         public Boolean doInBackground(Void... params) {
@@ -262,8 +265,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         public void onPostExecute(final Boolean success) {
-            String compare3 = Schedule.getUpdateDate(1, context);
-            String compare4 = Schedule.getUpdateDate(2, context);
+            String compare3 = Schedule.getUpdateDate(context);
 
             if (!success) {
                 if (e.getMessage() == "HTTP error fetching URL") {
@@ -274,26 +276,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     toast.show();
                 }
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { //.equals() causes crash on <4.0 devices
-                if (Objects.equals(compare1, compare3) && Objects.equals(compare2, compare4)) {
+                if (Objects.equals(compare1, compare3)) {
                     Toast toast = Toast.makeText(context, "Plan ist bereits aktuell."/*: " + Schedule.getUpdateDate(1, context)*/, Toast.LENGTH_LONG);
                     toast.show();
                 } else {
-                    Toast toast = Toast.makeText(context, "Neuer Plan geladen: " + Schedule.getUpdateDate(1, context), Toast.LENGTH_LONG);
+                    Toast toast = Toast.makeText(context, "Neuer Plan geladen: " + Schedule.getUpdateDate(context), Toast.LENGTH_LONG);
                     toast.show();
                     initTabs();
                 }
             } else {
                 initTabs();
             }
+
+            for (Tab tab : tabs) {
+                tab.swipeRefreshOff();
+            }
         }
     }
 
     @Override
     public void onRefresh() {
-        String compare1 = Schedule.getUpdateDate(1, this);
-        String compare2 = Schedule.getUpdateDate(2, this);
+        String compare1 = Schedule.getUpdateDate(this);
 
-        Refresh refresh = new Refresh(this, compare1, compare2);
+        Refresh refresh = new Refresh(this, compare1);
         refresh.execute();
     }
 }

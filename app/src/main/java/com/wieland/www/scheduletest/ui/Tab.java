@@ -1,5 +1,8 @@
 package com.wieland.www.scheduletest.ui;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -13,6 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.wieland.www.scheduletest.R;
@@ -28,9 +32,10 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class Tab extends Fragment {
 
-    SwipeRefreshLayout SwipeRefresh;
+    SwipeRefreshLayout swipeRefresh;
     RecyclerView myList;
     Context context;
+    ProgressBar progressBar;
     View view;
     int index;
 
@@ -50,15 +55,15 @@ public class Tab extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        SwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh2);
+        swipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh2);
         myList = (RecyclerView) view.findViewById(R.id.theListOfDoom);
-        SwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        progressBar = view.findViewById(R.id.progressBar);
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 mCallback.onRefreshed();
             }
         });
-
 
         context = getActivity();
         SetTextTask setText = new SetTextTask(index, context);
@@ -84,6 +89,14 @@ public class Tab extends Fragment {
         }
     }
 
+    public void refresh() {
+        SetTextTask setText = new SetTextTask(index, context);
+        setText.execute();
+    }
+
+    public void swipeRefreshOff() {
+        swipeRefresh.setRefreshing(false);
+    }
 
     public class SetTextTask extends AsyncTask<Void, Void, Boolean> {
         private final Context context;
@@ -93,6 +106,29 @@ public class Tab extends Fragment {
         SetTextTask (int index, Context context) {
             this.context = context;
             this.index = index;
+            showProgress(true);
+        }
+
+        public void showProgress(final boolean show) {
+            final int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+            myList.setVisibility(show ? View.GONE : View.VISIBLE);
+            myList.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    myList.setVisibility(show ? View.GONE : View.VISIBLE);
+                }
+            });
+
+            progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+            progressBar.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
         }
 
         @Override
@@ -148,7 +184,8 @@ public class Tab extends Fragment {
             TextView username_view = (TextView) mHeaderView.findViewById(R.id.textView_username);
             username_view.setText(pref.getString("set_username", "[Nutzername]"));
             //setTitle(Schedule.getDate(index, this.context));
-            SwipeRefresh.setRefreshing(false);
+            swipeRefresh.setRefreshing(false);
+            showProgress(false);
         }
     }
 }
