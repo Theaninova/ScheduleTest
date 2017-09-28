@@ -54,7 +54,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
-                android:text="Klassen" />
+                android:text="Klassen (Für Oberstufe 11 oder 12 eingeben)" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -73,7 +73,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
-                android:text="Kurse (freilassen wenn ganze Klasse angezeigt werden soll)" />
+                android:text="Kurse" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -110,17 +110,6 @@
                 android:inputType="textPersonName"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView8" />
-
-            <Button
-                android:id="@+id/buttonSettingsConfirm"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:text="Übernehmen"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editTextCourses" />
 
             <TextView
                 android:id="@+id/textView9"

@@ -21,14 +21,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import com.wieland.www.scheduletest.schedule.BackgroundSync;
 import com.wieland.www.scheduletest.ui.PagerAdapter;
 import com.wieland.www.scheduletest.R;
 import com.wieland.www.scheduletest.schedule.Schedule;
-import com.wieland.www.scheduletest.ui.Tab;
+import com.wieland.www.scheduletest.ui.TabFragment;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,11 +35,11 @@ import java.util.Objects;
 
 //TODO: wire the OnScrollListener from the ListView manually http://nlopez.io/swiperefreshlayout-with-listview-done-right/
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener, Tab.OnHeadlineSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener, TabFragment.OnHeadlineSelectedListener {
 
     public static boolean firstTimeCreated = true;
     private PagerAdapter pagerAdapter;
-    private ArrayList<Tab> tabs;
+    private ArrayList<TabFragment> tabFragments;
     private TabLayout tabLayout;
 
     @Override
@@ -49,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        tabs = new ArrayList<>();
+        tabFragments = new ArrayList<>();
 
         SharedPreferences pref = this.getSharedPreferences("Tralala", MODE_PRIVATE);
 
@@ -60,27 +59,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
         }
 
-        /*try {
-            Schedule.refresh(this);
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-        }*/
-
         initTabs();
+
+        if (savedInstanceState != null) {
+            for (int i = 0; i < tabFragments.size(); i++) {
+                getSupportFragmentManager().beginTransaction().attach(tabFragments.get(i)).commit();
+                tabFragments.get(i).context = this;
+            }
+        }
 
         //Setting up background sync
         final Context context = this;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { //Job Scheduler requires API 21+
             JobScheduler jobScheduler = (JobScheduler) context.getSystemService(context.JOB_SCHEDULER_SERVICE);
-            jobScheduler.cancelAll();
-            JobInfo.Builder builder = new JobInfo.Builder(1,
-                    new ComponentName(getPackageName(),
-                            BackgroundSync.class.getName()));
-            builder.setPeriodic(15 * 60 * 1000);//15 minutes
-            if (jobScheduler.schedule(builder.build()) <= JobScheduler.RESULT_FAILURE) {
-                Toast.makeText(getApplicationContext(),
-                        "Fail", Toast.LENGTH_SHORT)
-                        .show();
+            if (jobScheduler.getAllPendingJobs().size() != 0) { //Don't start if it's already running
+                jobScheduler.cancelAll();
+                JobInfo.Builder builder = new JobInfo.Builder(1,
+                        new ComponentName(getPackageName(),
+                                BackgroundSync.class.getName()));
+                builder.setPeriodic(15 * 60 * 1000);//15 minutes
+                if (jobScheduler.schedule(builder.build()) <= JobScheduler.RESULT_FAILURE) {
+                    Toast.makeText(getApplicationContext(),
+                            "Fail", Toast.LENGTH_SHORT)
+                            .show();
+                }
+            }
+        } else {
+            try {
+                Schedule.refresh(this);
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
             }
         }
     }
@@ -89,9 +97,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         SharedPreferences pref = this.getSharedPreferences("Tralala", MODE_PRIVATE);
 
         for (int i = 1; i <= pref.getInt(Schedule.PAGES_COUNT, 0); i++) {
-            Tab tab = new Tab();
-            tab.setIndex(i);
-            tabs.add(tab);
+            TabFragment tabFragment = new TabFragment();
+            tabFragment.setIndex(i);
+            tabFragments.add(tabFragment);
         }
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -99,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         tabLayout = findViewById(R.id.tab_layout);
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
-        tabLayout.removeAllTabs();
+        //tabLayout.removeAllTabs();
         for (int i = 1; i <= pref.getInt(Schedule.PAGES_COUNT, 0); i++) {
             tabLayout.addTab(tabLayout.newTab());
             //setting tab title
@@ -110,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         final ViewPager viewPager = findViewById(R.id.pager);
-        pagerAdapter = new PagerAdapter(getSupportFragmentManager(), tabs);
+        pagerAdapter = new PagerAdapter(getSupportFragmentManager(), tabFragments);
         viewPager.setAdapter(pagerAdapter);
 
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
@@ -155,8 +163,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void refreshTabs() {
-        for (Tab tab : tabs) {
-            tab.refresh();
+        for (int i = 0; i < tabFragments.size(); i++) {
+            tabFragments.get(i).refresh();
         }
     }
 
@@ -288,8 +296,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 initTabs();
             }
 
-            for (Tab tab : tabs) {
-                tab.swipeRefreshOff();
+            for (int i = 0; i < tabFragments.size(); i++) {
+                tabFragments.get(i).swipeRefreshOff();
             }
         }
     }

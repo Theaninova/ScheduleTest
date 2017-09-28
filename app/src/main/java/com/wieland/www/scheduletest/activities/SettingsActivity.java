@@ -6,7 +6,9 @@ import android.content.SharedPreferences;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -23,7 +25,6 @@ import java.util.ArrayList;
 
 public class SettingsActivity extends AppCompatActivity {
     EditText customQuery;
-    Button confirm;
     Context context;
     ArrayList<String> classesList, coursesList;
     Switch aSwitch;
@@ -40,7 +41,6 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
 
         customQuery = (EditText) findViewById(R.id.editTextCustomSQL);
-        confirm = (Button) findViewById(R.id.buttonSettingsConfirm);
         context = this;
 
         aSwitch = (Switch) findViewById(R.id.switch1);
@@ -88,9 +88,19 @@ public class SettingsActivity extends AppCompatActivity {
 
         customQuery.setText(pref.getString(CUSTOMSQL_NAME, ""));
 
-        confirm.setOnClickListener(new View.OnClickListener() {
+        customQuery.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onClick(View v) {
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
                 SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putString(CUSTOMSQL_NAME, customQuery.getText().toString());

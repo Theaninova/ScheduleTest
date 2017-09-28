@@ -2,8 +2,6 @@ package com.wieland.www.scheduletest.ui;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -30,16 +28,19 @@ import static android.content.Context.MODE_PRIVATE;
  * Created by Wieland on 07.05.2017.
  */
 
-public class Tab extends Fragment {
+public class TabFragment extends Fragment {
 
     SwipeRefreshLayout swipeRefresh;
     RecyclerView myList;
-    Context context;
+    public Context context;
     ProgressBar progressBar;
     View view;
     int index;
 
     OnHeadlineSelectedListener mCallback;
+    public interface OnHeadlineSelectedListener {
+        void onRefreshed();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -55,9 +56,14 @@ public class Tab extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        if (savedInstanceState != null) {
+            this.index = (int) savedInstanceState.get("Index");
+        }
+
         swipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh2);
         myList = (RecyclerView) view.findViewById(R.id.theListOfDoom);
         progressBar = view.findViewById(R.id.progressBar);
+
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -65,28 +71,18 @@ public class Tab extends Fragment {
             }
         });
 
-        context = getActivity();
+        context = getContext();
+        mCallback = (OnHeadlineSelectedListener) context;
+
         SetTextTask setText = new SetTextTask(index, context);
         setText.execute();
     }
 
-    // Container Activity must implement this interface
-    public interface OnHeadlineSelectedListener {
-        public void onRefreshed();
-    }
-
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
 
-        // This makes sure that the container activity has implemented
-        // the callback interface. If not, it throws an exception
-        try {
-            mCallback = (OnHeadlineSelectedListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnHeadlineSelectedListener");
-        }
+        savedInstanceState.putInt("Index", index);
     }
 
     public void refresh() {

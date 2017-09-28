@@ -5,8 +5,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
-import com.wieland.www.scheduletest.ui.Tab;
-
 import java.util.ArrayList;
 
 /**
@@ -14,29 +12,29 @@ import java.util.ArrayList;
  */
 
 public class PagerAdapter extends FragmentStatePagerAdapter {
-    private ArrayList<Tab> tabs;
+    private ArrayList<TabFragment> tabFragments;
 
-    public PagerAdapter(FragmentManager fm, ArrayList<Tab> tabs) {
+    public PagerAdapter(FragmentManager fm, ArrayList<TabFragment> tabFragments) {
         super(fm);
-        this.tabs = tabs;
+        this.tabFragments = tabFragments;
     }
 
     @Override
     public Fragment getItem(int position) {
-        return tabs.get(position);
+        return tabFragments.get(position);
     }
 
     @Override
     public int getCount() {
-        return tabs.size();
+        return tabFragments.size();
     }
 
-    public ArrayList<Tab> getTabs() {
-        return tabs;
+    public ArrayList<TabFragment> getTabFragments() {
+        return tabFragments;
     }
 
-    public void setTabs(ArrayList<Tab> tabs) {
-        this.tabs = tabs;
+    public void setTabFragments(ArrayList<TabFragment> tabFragments) {
+        this.tabFragments = tabFragments;
         notifyDataSetChanged();
     }
 }
