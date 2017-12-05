@@ -14,7 +14,12 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -83,23 +88,32 @@ public class Schedule {
         String login = new String(Base64.encodeBase64(tmp.getBytes())); //encoding "username:password" Base64
 
         ArrayList<String> URLs = getURLs(login, context);
-
-        context.deleteDatabase(DatabaseHelper.DATABASE_NAME); //clear database
         boolean success = false; //for checking
 
         int pagesCount = 0;
 
-        for (int i = 1; i <= URLs.size(); i++) {
-            String URL = URLs.get(i - 1);
+        context.deleteDatabase(DatabaseHelper.DATABASE_NAME); //clear database
 
-            Document doc = Jsoup
-                    .connect(URL) //using a custom method to return a URL, there is no need for using two different methods which are doing essentially the same
+        for (int i = 1; i <= URLs.size(); i++) {
+            String url = URLs.get(i - 1);
+
+            URL theUrl = new URL(url);
+            URLConnection urlConnection = theUrl.openConnection();
+            urlConnection.setRequestProperty("Authorization", "Basic " + login);
+            InputStream is = urlConnection.getInputStream();
+
+            /*Document fl = Jsoup
+                    .connect(url) //using a custom method to return a URL, there is no need for using two different methods which are doing essentially the same
                     .header("Authorization", "Basic " + login) //just sort of standard layout for Basic http login
                     .userAgent("Android Phone") //may be obsolete, but removing this could end in problems in future updates of the website
-                    .get();
+                    .get();*/
+
+            Document doc = Jsoup.parse(is, "ISO8859-1", url);
+            //doc.charset(Charset.forName("Windows-1252"));
+
+            System.out.println("refreshing...");
 
             //START SQL
-
             String currentClass = "Aufsicht";
             String currentLesson = "";
             for (org.jsoup.nodes.Element table : doc.select("table")) {

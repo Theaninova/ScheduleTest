@@ -1,11 +1,13 @@
 package com.wieland.www.scheduletest.activities;
 
+import android.app.NotificationManager;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -30,6 +32,7 @@ import com.wieland.www.scheduletest.schedule.Schedule;
 import com.wieland.www.scheduletest.ui.TabFragment;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -72,19 +75,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final Context context = this;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { //Job Scheduler requires API 21+
             JobScheduler jobScheduler = (JobScheduler) context.getSystemService(context.JOB_SCHEDULER_SERVICE);
-            if (jobScheduler.getAllPendingJobs().size() != 0) { //Don't start if it's already running
-                jobScheduler.cancelAll();
-                JobInfo.Builder builder = new JobInfo.Builder(1,
-                        new ComponentName(getPackageName(),
-                                BackgroundSync.class.getName()));
-                builder.setPeriodic(15 * 60 * 1000);//15 minutes
-                if (jobScheduler.schedule(builder.build()) <= JobScheduler.RESULT_FAILURE) {
-                    Toast.makeText(getApplicationContext(),
-                            "Fail", Toast.LENGTH_SHORT)
-                            .show();
-                }
+            try {
+                jobScheduler.cancel(1);
+            } catch (NullPointerException e) {
+
+            }
+            JobInfo.Builder builder = new JobInfo.Builder(1,
+                    new ComponentName(getPackageName(),
+                            BackgroundSync.class.getName()));
+            builder.setPeriodic(15 * 60 * 1000);//15 minutes
+            if (jobScheduler.schedule(builder.build()) <= JobScheduler.RESULT_FAILURE) {
+                Toast.makeText(getApplicationContext(),
+                        "Fail", Toast.LENGTH_SHORT)
+                        .show();
+                System.err.println("Something went wrong with the job Scheduler...");
+            } else {
+                System.out.println("jobScheduler looking good so far...");
             }
         } else {
+            System.err.println("Something went wrong with the job Scheduler...");
             try {
                 Schedule.refresh(this);
             } catch (IOException e) {

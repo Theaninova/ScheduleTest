@@ -10,6 +10,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -72,15 +73,15 @@ public class SettingsActivity extends AppCompatActivity {
         listClasses.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                AlertDialog.Builder builder = getDialog("Klasse", classesList, position, CLASSES_NAME, listClasses, true);
-                builder.show();
+                AlertDialog dialog = getDialog("Klasse", classesList, position, CLASSES_NAME, listClasses, true);
+                dialog.show();
             }
         });
         listCourses.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                AlertDialog.Builder builder = getDialog("Kurs", coursesList, position, COURSES_NAME, listCourses, false);
-                builder.show();
+                AlertDialog dialog = getDialog("Kurs", coursesList, position, COURSES_NAME, listCourses, false);
+                dialog.show();
             }
         });
         Layout_Row.setListViewHeightBasedOnItems(listClasses);
@@ -127,7 +128,7 @@ public class SettingsActivity extends AppCompatActivity {
         return unscrambledList;
     }
 
-    private AlertDialog.Builder getDialog(String title, final ArrayList<String> list, final int position, final String sharedPreferenceName, final ListView listView, final boolean classes) {
+    private AlertDialog getDialog(String title, final ArrayList<String> list, final int position, final String sharedPreferenceName, final ListView listView, final boolean classes) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
 
@@ -216,6 +217,15 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
-        return builder;
+        AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
+
+        return dialog;
     }
 }

@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/ScheduleTest.iml" filepath="$PROJECT_DIR$/ScheduleTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ScheduleTest.iml" filepath="$PROJECT_DIR$/.idea/ScheduleTest.iml" />
+      <module fileurl="file://D:\myRoRo\ScheduleTest\ScheduleTest.iml" filepath="D:\myRoRo\ScheduleTest\ScheduleTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

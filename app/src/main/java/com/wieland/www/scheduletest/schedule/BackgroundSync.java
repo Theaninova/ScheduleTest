@@ -30,6 +30,8 @@ import java.util.Objects;
  */
 
 public class BackgroundSync extends JobService {
+    public static final String CHANNEL_NAME = "my_channel_01";
+
     @Override
     public boolean onStartJob(JobParameters params) {
         mJobHandler.sendMessage( Message.obtain( mJobHandler, 1, params ) );
@@ -57,7 +59,8 @@ public class BackgroundSync extends JobService {
                                 .setSmallIcon(R.drawable.notification_icon)
                                 .setContentTitle("Neuer Plan geladen!")
                                 .setContentText("Aktualisierungsdatum des Plans: " + compare3)
-                                .setChannelId("my_channel_01")
+                                .setChannelId(CHANNEL_NAME)
+                                .setAutoCancel(true)
                                 .setPriority(Notification.PRIORITY_HIGH);
 
                 Intent resultIntent = new Intent(getApplicationContext(), MainActivity.class);
@@ -90,7 +93,7 @@ public class BackgroundSync extends JobService {
                         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    NotificationChannel channel = new NotificationChannel("my_channel_01",
+                    NotificationChannel channel = new NotificationChannel(CHANNEL_NAME,
                             "Vertretungsplan Aktualisierung",
                             NotificationManager.IMPORTANCE_HIGH);
                     mNotificationManager.createNotificationChannel(channel);

@@ -40,8 +40,12 @@ public class ScheduleHandler {
 
         res = db.rawQuery("SELECT " + databaseHelper.COL_1 + " FROM " + databaseHelper.TABLE_NAME + index + " GROUP BY " + databaseHelper.COL_1, null);
 
-        while (res.moveToNext()) {
-            outputList.add(res.getString(0));
+        try {
+            while (res.moveToNext()) {
+                outputList.add(res.getString(0));
+            }
+        } finally {
+            res.close();
         }
 
         return outputList;
@@ -52,16 +56,20 @@ public class ScheduleHandler {
         DatabaseHelper databaseHelper = new DatabaseHelper(context);
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
         Cursor res = db.rawQuery(SQL, null);
-        while(res.moveToNext()) {
-            int i = 0;
-            while(true) {
-                try {
-                    output.add(res.getString(i));
-                } catch (Exception e) {
-                    break;
+        try {
+            while (res.moveToNext()) {
+                int i = 0;
+                while (true) {
+                    try {
+                        output.add(res.getString(i));
+                    } catch (Exception e) {
+                        break;
+                    }
+                    i++;
                 }
-                i++;
             }
+        } finally {
+            res.close();
         }
         return output;
     }
@@ -77,6 +85,7 @@ public class ScheduleHandler {
         while (res.moveToNext()) {
             outputList.add(res.getString(0));
         }
+        res.close();
 
         return outputList;
     }
@@ -122,8 +131,12 @@ public class ScheduleHandler {
 
         res = db.rawQuery("SELECT kl FROM " + databaseHelper.TABLE_NAME + index  + extraArgumentsSQL + " GROUP BY " + databaseHelper.COL_1, null);
 
-        while (res.moveToNext()) {
-            outputList.add(res.getString(0));
+        try {
+            while (res.moveToNext()) {
+                outputList.add(res.getString(0));
+            }
+        } finally {
+            res.close();
         }
 
         return outputList;
@@ -216,88 +229,92 @@ public class ScheduleHandler {
 
         String currentLesson = "x";
 
-        while (res.moveToNext()) {
-            forInfo = true;
-            String output = "";
+        try {
+            while (res.moveToNext()) {
+                forInfo = true;
+                String output = "";
 
-            if (res.getString(2).contains(currentLesson))
-                output = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-            else if (currentLesson.contains("10"))
-                output = res.getString(2) + ".&nbsp;";
-            else
-                output = res.getString(2) + ".&nbsp;&nbsp;";
-
-            if (res.getString(6).contains("\u00A0")) {
-                if (res.getString(3).contains("\u00A0"))
-                    output = output + getColoredSpanned("[Fach]", "grey");
-                else
-                    output = output + getColoredSpanned(res.getString(3), "#008000");
-            } else {
-                output = output + getColoredSpanned(res.getString(6), "#8B0000");
-            }
-
-            if (res.getString(5).contains("*Frei")) {
-                output = output + " " + getColoredSpanned("entfällt", "#8B0000");
-                forInfo = false;
-            } else if (res.getString(5).contains("Raum�nderung")) {
-                output = output + ": Raumänderung in Raum " + getColoredSpanned(res.getString(7), "#8B0000");
-                forInfo = false;
-            } else if (res.getString(5).contains("*Stillarbeit")) {
-                //if (myList.get(3) == "null")  //TODO: Stillarbeit Teacher
-                if (res.getString(4).contains("\u00A0"))
-                    output = output + ": " + getColoredSpanned("Stillarbeit", "#8B0000");
-                else
-                    output = output + ": " + getColoredSpanned("Stillarbeit", "#8B0000") + " in Raum " + getColoredSpanned(res.getString(4), "#008000");
-                forInfo = false;
-            }
-
-
-            if (forInfo) {
-                output = output + " bei ";
-
-                if (res.getString(5).contains("\u00A0")) {
-                    output = output + getColoredSpanned("[Lehrer]", "grey");
-                } else {
-                    output = output + getColoredSpanned(res.getString(5), "#8B0000");
-                }
-
-
-                if (res.getString(7).contains("\u00A0")) {
-                    if (res.getString(4).contains("\u00A0"))
-                        output = output + " in " + getColoredSpanned("[Raum]", "grey");
-                    else {
-                        output = output + " in Raum " + getColoredSpanned(res.getString(4), "#008000");
-                    }
-                } else {
-                    output = output + " in Raum ";
-                    output = output + getColoredSpanned(res.getString(7), "#8B0000");
-                }
-            }
-
-            if (res.getString(8).contains("verschoben")) {
                 if (res.getString(2).contains(currentLesson))
-                    output = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned(res.getString(3), "#008000") + " wird " + getColoredSpanned(res.getString(8), "#8B0000");
+                    output = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                 else if (currentLesson.contains("10"))
-                    output = res.getString(2) + ".&nbsp;" + getColoredSpanned(res.getString(3), "#008000") + " wird " + getColoredSpanned(res.getString(8), "#8B0000");
+                    output = res.getString(2) + ".&nbsp;";
                 else
-                    output = res.getString(2) + ".&nbsp;&nbsp;" + getColoredSpanned(res.getString(3), "#008000") + " wird " + getColoredSpanned(res.getString(8), "#8B0000");  //[Fach] wird [verschoben auf Datum]
-            } else if (res.getString(8).contains("anstatt")) {
-                output = output + " " + res.getString(8);
-            } else if (res.getString(8).contains("Aufg. erteilt")) {
-                output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned("Aufgaben erteilt", "grey");
-            } else if (res.getString(8).contains("Aufg. f�r zu Hause erteilt")) {
-                output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned("Aufgaben für Zuhause erteilt", "grey");
-            } else if (res.getString(8).contains("Aufg. f�r Stillarbeit erteilt")) {
-                output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned("Aufgaben für Stillarbeit erteilt", "grey");
-                //} else if (myList.get(six).contains("ganze Klasse")) {
-            } else if (!res.getString(8).contains("\u00A0")) {
-                output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned(res.getString(8), "grey");
+                    output = res.getString(2) + ".&nbsp;&nbsp;";
+
+                if (res.getString(6).contains("\u00A0")) {
+                    if (res.getString(3).contains("\u00A0"))
+                        output = output + getColoredSpanned("[Fach]", "grey");
+                    else
+                        output = output + getColoredSpanned(NameShortcuts.getRealClass(res.getString(3)), "#008000");
+                } else {
+                    output = output + getColoredSpanned(NameShortcuts.getRealClass(res.getString(6)), "#8B0000");
+                }
+
+                if (res.getString(5).contains("*Frei")) {
+                    output = output + " " + getColoredSpanned("entfällt", "#8B0000");
+                    forInfo = false;
+                } else if (res.getString(5).contains("Raumänderung")) {
+                    output = output + ": Raumänderung in Raum " + getColoredSpanned(res.getString(7), "#8B0000");
+                    forInfo = false;
+                } else if (res.getString(5).contains("*Stillarbeit")) {
+                    //if (myList.get(3) == "null")  //TODO: Stillarbeit Teacher
+                    if (res.getString(4).contains("\u00A0"))
+                        output = output + ": " + getColoredSpanned("Stillarbeit", "#8B0000");
+                    else
+                        output = output + ": " + getColoredSpanned("Stillarbeit", "#8B0000") + " in Raum " + getColoredSpanned(res.getString(4), "#008000");
+                    forInfo = false;
+                }
+
+
+                if (forInfo) {
+                    output = output + " bei ";
+
+                    if (res.getString(5).contains("\u00A0")) {
+                        output = output + getColoredSpanned("[Lehrer]", "grey");
+                    } else {
+                        output = output + getColoredSpanned(NameShortcuts.getRealName(res.getString(5)), "#8B0000");
+                    }
+
+
+                    if (res.getString(7).contains("\u00A0")) {
+                        if (res.getString(4).contains("\u00A0"))
+                            output = output + " in " + getColoredSpanned("[Raum]", "grey");
+                        else {
+                            output = output + " in Raum " + getColoredSpanned(res.getString(4), "#008000");
+                        }
+                    } else {
+                        output = output + " in Raum ";
+                        output = output + getColoredSpanned(res.getString(7), "#8B0000");
+                    }
+                }
+
+                if (res.getString(8).contains("verschoben")) {
+                    if (res.getString(2).contains(currentLesson))
+                        output = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned(NameShortcuts.getRealClass(res.getString(3)), "#008000") + " wird " + getColoredSpanned(res.getString(8), "#8B0000");
+                    else if (currentLesson.contains("10"))
+                        output = res.getString(2) + ".&nbsp;" + getColoredSpanned(NameShortcuts.getRealClass(res.getString(3)), "#008000") + " wird " + getColoredSpanned(res.getString(8), "#8B0000");
+                    else
+                        output = res.getString(2) + ".&nbsp;&nbsp;" + getColoredSpanned(NameShortcuts.getRealClass(res.getString(3)), "#008000") + " wird " + getColoredSpanned(res.getString(8), "#8B0000");  //[Fach] wird [verschoben auf Datum]
+                } else if (res.getString(8).contains("anstatt")) {
+                    output = output + " " + res.getString(8);
+                } else if (res.getString(8).contains("Aufg. erteilt")) {
+                    output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned("Aufgaben erteilt", "grey");
+                } else if (res.getString(8).contains("Aufg. für zu Hause erteilt")) {
+                    output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned("Aufgaben für Zuhause erteilt", "grey");
+                } else if (res.getString(8).contains("Aufg. für Stillarbeit erteilt")) {
+                    output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned("Aufgaben für Stillarbeit erteilt", "grey");
+                    //} else if (myList.get(six).contains("ganze Klasse")) {
+                } else if (!res.getString(8).contains("\u00A0")) {
+                    output = output + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + getColoredSpanned(res.getString(8), "grey");
+                }
+
+                if (!res.getString(2).contains("&nbsp;"))
+                    currentLesson = res.getString(2);
+
+                outList.add(Html.fromHtml(output));
             }
-
-            if (!res.getString(2).contains("&nbsp;"))
-                currentLesson = res.getString(2);
-
-            outList.add(Html.fromHtml(output));
+        } finally {
+            res.close();
         }
 
         return outList;
