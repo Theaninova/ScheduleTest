@@ -10,27 +10,27 @@ public class NameShortcuts {
             case "Thei":
                 return "Frau Theiss";
             case "Mitt":
-                return "Herr Mittag";
+                return "Herrn Mittag";
             case "Otti":
-                return "Herr Ottink";
+                return "Herrn Ottink";
             case "MoßF":
                 return "Frau Moß";
             case "Conr":
                 return "Frau Conrad";
-            case "Völk":
+            case "Vökl":
                 return "Frau Völker-Klatte";
             case "Häne":
-                return "Herr Hänel";
+                return "Herrn Hänel";
             case "vPar":
-                return "Herr von Paris";
+                return "Herrn von Paris";
             case "Wala":
                 return "Frau Walachowitz";
             case "Beye":
-                return "Herr Beyerle";
+                return "Herrn Beyerle";
             case "Gres":
                 return "Frau Gresch";
             case "Gegu":
-                return "Herr Gegusch";
+                return "Herrn Gegusch";
             case "Kühn":
                 return "Frau Kühne";
             case "Jahn":
@@ -38,13 +38,13 @@ public class NameShortcuts {
             case "Drew":
                 return "Frau Drews";
             case "Siek":
-                return "Herr Siek";
+                return "Herrn Siek";
             case "Bett":
-                return "Herr Bettencourt";
+                return "Herrn Bettencourt";
             case "Hüls":
-                return "Herr Hülsmann";
+                return "Herrn Hülsmann";
             case "Pösc":
-                return "Herr Pöschl";
+                return "Herrn Pöschl";
             case "Toka":
                 return "Frau Tokarik";
             case "Krab":
@@ -54,32 +54,35 @@ public class NameShortcuts {
             case "Pill":
                 return "Frau Pillin";
             case "Möbi":
-                return "Herr Möbius";
+                return "Herrn Möbius";
             case "Jehl":
-                return "Herr Jehle";
+                return "Herrn Jehle";
             case "Deut":
                 return "Frau Deutschmann";
             case "Rex":
                 return "Frau Rex";
             case "Wese":
-                return "Herr Weser";
+                return "Herrn Weser";
             case "Bern":
                 return "Frau Bernd";
             case "Kans":
-                return "Herr Kanstinger";
+                return "Herrn Kanstinger";
             case "Köni":
-                return "Herr König";
+                return "Herrn König";
             case "MoßH":
-                return "Herr Moß";
+                return "Herrn Moß";
             case "Brem":
-                return "Herr Bremert";
+                return "Herrn Bremert";
             case "Miko":
                 return "Frau Mikoleiwski";
             case "Rapp":
-                return "Herr Rapp";
+                return "Herrn Rapp";
             case "Habe":
                 return "Frau Habermann-Lange";
-
+            case "Bahr":
+                return "Frau Bahr";
+            case "Lehn":
+                return "Frau Lehne";
 
             default:
                 return "[" + fakeName + "]";
@@ -114,6 +117,8 @@ public class NameShortcuts {
                 return "Erdkunde";
             case "Ph":
                 return "Physik";
+            case "Bi":
+                return "Bio";
 
             default:
                 return /*"[" + */fakeClass/* + "]"*/;

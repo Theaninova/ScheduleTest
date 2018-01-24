@@ -145,13 +145,16 @@ public class Schedule {
             //SAVING DATES
             String out;
             out = doc.select("h2").text();
-            editor.putString("Day" + i + "_Date", out);
 
-            out = doc.select("h1").text();
-            editor.putString("Day" + i + "_UpdateDate", out);
-            //END SAVING DATES
+            if (!out.contains("erscheint")) {
+                editor.putString("Day" + i + "_Date", out);
 
-            pagesCount = i;
+                out = doc.select("h1").text();
+                editor.putString("Day" + i + "_UpdateDate", out);
+                //END SAVING DATES
+
+                pagesCount = i;
+            }
         }
         editor.putInt(PAGES_COUNT, pagesCount);
 
