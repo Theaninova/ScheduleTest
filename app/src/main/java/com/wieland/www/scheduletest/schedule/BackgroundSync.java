@@ -47,61 +47,6 @@ public class BackgroundSync extends JobService {
             NotificationAsyncTask notificationAsyncTask = new NotificationAsyncTask(getApplicationContext());
             notificationAsyncTask.execute();
 
-            String compare3 = Schedule.getUpdateDate(getApplicationContext());
-
-            if(!(Objects.equals(compare1, compare3))) {
-                int tomorrow = 2;
-                if (Schedule.getDate(2, getApplicationContext()).contains("erscheint"))
-                    tomorrow = 1;
-
-                NotificationCompat.Builder mBuilder =
-                        new NotificationCompat.Builder(getApplicationContext())
-                                .setSmallIcon(R.drawable.notification_icon)
-                                .setContentTitle("Neuer Plan geladen!")
-                                .setContentText("Aktualisierungsdatum des Plans: " + compare3)
-                                .setChannelId(CHANNEL_NAME)
-                                .setAutoCancel(true)
-                                .setPriority(Notification.PRIORITY_HIGH);
-
-                Intent resultIntent = new Intent(getApplicationContext(), MainActivity.class);
-                TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
-                stackBuilder.addParentStack(MainActivity.class);
-                stackBuilder.addNextIntent(resultIntent);
-                PendingIntent resultPendingIntent =
-                        stackBuilder.getPendingIntent(
-                                0,
-                                PendingIntent.FLAG_UPDATE_CURRENT
-                        );
-                mBuilder.setContentIntent(resultPendingIntent);
-
-                //Setting expanded View
-                NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
-                inboxStyle.setBigContentTitle(Schedule.getDate(tomorrow, getApplicationContext()) + ":");
-                ScheduleHandler scheduleHandler = new ScheduleHandler(tomorrow, getApplicationContext());
-                ArrayList<String> classes = scheduleHandler.getClassListPersonalized();
-                for (int i = 0; i < classes.size(); i++) {
-                    ArrayList<android.text.Spanned> arrayList = scheduleHandler.getClassInfoPersonalized(classes.get(i));
-                    inboxStyle.addLine(classes.get(i));
-                    for (int s = 0; s < arrayList.size(); s++) {
-                        inboxStyle.addLine(arrayList.get(s).toString());
-                    }
-                }
-
-                mBuilder.setStyle(inboxStyle);
-
-                NotificationManager mNotificationManager =
-                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    NotificationChannel channel = new NotificationChannel(CHANNEL_NAME,
-                            "Vertretungsplan Aktualisierung",
-                            NotificationManager.IMPORTANCE_HIGH);
-                    mNotificationManager.createNotificationChannel(channel);
-                }
-
-                mNotificationManager.notify(1, mBuilder.build());
-            }
-
             jobFinished( (JobParameters) msg.obj, false );
             return true;
         }
@@ -110,8 +55,12 @@ public class BackgroundSync extends JobService {
 
     class NotificationAsyncTask extends AsyncTask<Void, Void, Boolean> {
         Context context;
+        String compare1;
 
-        NotificationAsyncTask(Context context) {this.context = context;}
+        NotificationAsyncTask(Context context) {
+            this.context = context;
+            compare1 = Schedule.getUpdateDate(context);
+        }
 
         @Override
         public Boolean doInBackground(Void... params) {
@@ -132,6 +81,68 @@ public class BackgroundSync extends JobService {
             } catch (java.io.IOException e) {}
             return true;
         }
+
+        @Override
+        public void onPostExecute(Boolean bool) {
+            String compare3 = Schedule.getUpdateDate(context);
+
+            if(!(Objects.equals(compare1, compare3))) {
+                createNotification(compare3, context);
+            }
+        }
+    }
+
+    public void createNotification(String text, Context context) {
+        int tomorrow = 2;
+        if (Schedule.getDate(2, context).contains("erscheint"))
+            tomorrow = 1;
+
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(context)
+                        .setSmallIcon(R.drawable.notification_icon)
+                        .setContentTitle("Neuer Plan geladen!")
+                        .setContentText("Aktualisierungsdatum des Plans: " + text)
+                        .setChannelId(CHANNEL_NAME)
+                        .setAutoCancel(true)
+                        .setPriority(Notification.PRIORITY_HIGH);
+
+        Intent resultIntent = new Intent(context, MainActivity.class);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        mBuilder.setContentIntent(resultPendingIntent);
+
+        //Setting expanded View
+        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+        inboxStyle.setBigContentTitle(Schedule.getDate(tomorrow, context) + ":");
+        ScheduleHandler scheduleHandler = new ScheduleHandler(tomorrow, context);
+        ArrayList<String> classes = scheduleHandler.getClassListPersonalized();
+        for (int i = 0; i < classes.size(); i++) {
+            ArrayList<android.text.Spanned> arrayList = scheduleHandler.getClassInfoPersonalized(classes.get(i));
+            inboxStyle.addLine(classes.get(i));
+            for (int s = 0; s < arrayList.size(); s++) {
+                inboxStyle.addLine(arrayList.get(s).toString());
+            }
+        }
+
+        mBuilder.setStyle(inboxStyle);
+
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(CHANNEL_NAME,
+                    "Vertretungsplan Aktualisierung",
+                    NotificationManager.IMPORTANCE_HIGH);
+            mNotificationManager.createNotificationChannel(channel);
+        }
+
+        mNotificationManager.notify(1, mBuilder.build());
     }
 
     @Override

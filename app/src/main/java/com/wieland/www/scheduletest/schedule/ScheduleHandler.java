@@ -155,15 +155,15 @@ public class ScheduleHandler {
         SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
         String coursesRaw = pref.getString("Courses", "");
 
-        if (coursesRaw == "")
-            return new ArrayList<>();
+        /*if (coursesRaw == "")
+            return new ArrayList<>();*/
 
         ArrayList<String> extraArguments = new ArrayList<>();
         String buffer = "";
 
         boolean moreThanZero = false;
 
-        if (coursesRaw != null && coursesRaw.length() > 0) {
+        if (coursesRaw != "" && coursesRaw.length() > 0) {
             for (int i = 0; i < coursesRaw.length(); i++) {
                 if ((coursesRaw.charAt(i) == ';') || (i == (coursesRaw.length() - 1))) {
                     if (i == (coursesRaw.length() - 1))
