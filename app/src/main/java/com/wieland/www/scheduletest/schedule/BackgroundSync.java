@@ -121,7 +121,7 @@ public class BackgroundSync extends JobService {
         NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
         inboxStyle.setBigContentTitle(Schedule.getDate(tomorrow, context) + ":");
         ScheduleHandler scheduleHandler = new ScheduleHandler(tomorrow, context);
-        ArrayList<String> classes = scheduleHandler.getClassListPersonalized();
+        ArrayList<String> classes = scheduleHandler.getClassListPersonalized(0);
         for (int i = 0; i < classes.size(); i++) {
             ArrayList<android.text.Spanned> arrayList = scheduleHandler.getClassInfoPersonalized(classes.get(i));
             inboxStyle.addLine(classes.get(i));

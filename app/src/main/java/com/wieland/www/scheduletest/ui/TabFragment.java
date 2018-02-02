@@ -29,13 +29,13 @@ import static android.content.Context.MODE_PRIVATE;
  */
 
 public class TabFragment extends Fragment {
-
     SwipeRefreshLayout swipeRefresh;
     RecyclerView myList;
     public Context context;
     ProgressBar progressBar;
     View view;
     int index;
+    int customIndex;
 
     OnHeadlineSelectedListener mCallback;
     public interface OnHeadlineSelectedListener {
@@ -48,8 +48,9 @@ public class TabFragment extends Fragment {
         return view;
     }
 
-    public void setIndex(int index) {
+    public void setIndex(int index, int customIndex) {
         this.index = index;
+        this.customIndex = customIndex;
     }
 
     @Override
@@ -137,7 +138,7 @@ public class TabFragment extends Fragment {
             SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);
             if(pref.getInt("customizedLayout2", 1) == 2) {
                 try {
-                    willBeSet = myHandler.getClassListPersonalized();
+                    willBeSet = myHandler.getClassListPersonalized(customIndex);
                 } catch (Exception e) {}
             } else if (pref.getInt("customizedLayout2", 1) == 1)
                 willBeSet = myHandler.getClassList();

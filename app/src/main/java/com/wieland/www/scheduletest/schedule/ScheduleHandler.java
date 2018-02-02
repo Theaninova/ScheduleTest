@@ -21,11 +21,20 @@ public class ScheduleHandler {
     private int index;
     Context context;
     private ArrayList<String> myList = new ArrayList<>();
+    boolean teacher;
 
     public ScheduleHandler(int index, Context context) {
         databaseHelper = new DatabaseHelper(context);
         this.index = index;
         this.context = context;
+        teacher = false;
+    }
+
+    public ScheduleHandler(int index, Context context, boolean teacher) {
+        databaseHelper = new DatabaseHelper(context);
+        this.index = index;
+        this.context = context;
+        this.teacher = teacher;
     }
 
     /**
@@ -96,7 +105,7 @@ public class ScheduleHandler {
         return getClassInfoForSQL("SELECT * FROM " + databaseHelper.TABLE_NAME + index + " WHERE (" + pref.getString(SettingsActivity.CUSTOMSQL_NAME, "")+ ") and " + databaseHelper.COL_1 + " = '" + thisClass + "'");
     }
 
-    public ArrayList<String> getClassListPersonalized() {
+    public ArrayList<String> getClassListPersonalized(int id) {
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
         Cursor res;
         SharedPreferences pref = context.getSharedPreferences("Tralala", MODE_PRIVATE);

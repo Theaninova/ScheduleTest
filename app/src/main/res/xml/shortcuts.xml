@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
-    <shortcut
+    <!-- <shortcut
         android:enabled="true"
         android:icon="@drawable/ic_menu_today"
         android:shortcutDisabledMessage="@string/compose_disabled_message1"
@@ -11,9 +11,6 @@
             android:action="android.intent.action.VIEW"
             android:targetClass="com.wieland.www.scheduletest.activities.MainActivity"
             android:targetPackage="com.wieland.www.scheduletest" />
-        <!-- If your shortcut is associated with multiple intents, include them
-        here. The last intent in the list determines what the user sees when
-        they launch this shortcut. -->
         <categories android:name="android.shortcut.conversation" />
     </shortcut>
 
@@ -28,9 +25,6 @@
             android:action="android.intent.action.VIEW"
             android:targetClass="com.wieland.www.scheduletest.activities.MainActivity"
             android:targetPackage="com.wieland.www.scheduletest" />
-        <!-- If your shortcut is associated with multiple intents, include them
-        here. The last intent in the list determines what the user sees when
-        they launch this shortcut. -->
         <categories android:name="android.shortcut.conversation" />
     </shortcut>
 
@@ -45,9 +39,6 @@
             android:action="android.intent.action.VIEW"
             android:targetClass="com.wieland.www.scheduletest.activities.MainActivity"
             android:targetPackage="com.wieland.www.scheduletest" />
-        <!-- If your shortcut is associated with multiple intents, include them
-        here. The last intent in the list determines what the user sees when
-        they launch this shortcut. -->
         <categories android:name="android.shortcut.conversation" />
     </shortcut>
 
@@ -62,9 +53,6 @@
             android:action="android.intent.action.VIEW"
             android:targetClass="com.wieland.www.scheduletest.activities.MainActivity"
             android:targetPackage="com.wieland.www.scheduletest" />
-        <!-- If your shortcut is associated with multiple intents, include them
-        here. The last intent in the list determines what the user sees when
-        they launch this shortcut. -->
         <categories android:name="android.shortcut.conversation" />
-    </shortcut>
+    </shortcut> -->
 </shortcuts>

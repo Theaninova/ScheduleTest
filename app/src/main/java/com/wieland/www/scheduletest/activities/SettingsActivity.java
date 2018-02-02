@@ -2,6 +2,7 @@ package com.wieland.www.scheduletest.activities;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -108,6 +109,12 @@ public class SettingsActivity extends AppCompatActivity {
                 editor.commit();
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
     }
 
     public ArrayList<String> unscrambleRaw(String rawList) {

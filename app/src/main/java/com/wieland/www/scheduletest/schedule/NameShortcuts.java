@@ -6,7 +6,8 @@ package com.wieland.www.scheduletest.schedule;
 
 public class NameShortcuts {
     public static String getRealName(String fakeName) {
-        switch (fakeName) {
+        //TODO: Name database
+        /*switch (fakeName) {
             case "Thei":
                 return "Frau Theiss";
             case "Mitt":
@@ -86,7 +87,8 @@ public class NameShortcuts {
 
             default:
                 return "[" + fakeName + "]";
-        }
+        }*/
+        return fakeName;
     }
 
     public static String getRealClass(String fakeClass) {

@@ -13,6 +13,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
@@ -85,9 +86,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             BackgroundSync.class.getName()));
             builder.setPeriodic(15 * 60 * 1000);//15 minutes
             if (jobScheduler.schedule(builder.build()) <= JobScheduler.RESULT_FAILURE) {
-                Toast.makeText(getApplicationContext(),
-                        "Fail", Toast.LENGTH_SHORT)
-                        .show();
+                Snackbar.make(findViewById(R.id.content_main2), "Fail", Snackbar.LENGTH_SHORT).show();
                 System.err.println("Something went wrong with the job Scheduler...");
             } else {
                 System.out.println("jobScheduler looking good so far...");
@@ -105,9 +104,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void initTabs() {
         SharedPreferences pref = this.getSharedPreferences("Tralala", MODE_PRIVATE);
 
+        //TODO: More than one personalized view
         for (int i = 1; i <= pref.getInt(Schedule.PAGES_COUNT, 0); i++) {
             TabFragment tabFragment = new TabFragment();
-            tabFragment.setIndex(i);
+            tabFragment.setIndex(i, 0);
             tabFragments.add(tabFragment);
         }
 
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         tabLayout = findViewById(R.id.tab_layout);
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
-        //tabLayout.removeAllTabs();
+        tabLayout.removeAllTabs();
         for (int i = 1; i <= pref.getInt(Schedule.PAGES_COUNT, 0); i++) {
             tabLayout.addTab(tabLayout.newTab());
             //setting tab title
@@ -172,8 +172,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void refreshTabs() {
-        for (int i = 0; i < tabFragments.size(); i++) {
-            tabFragments.get(i).refresh();
+        try {
+            for (int i = 0; i < tabFragments.size(); i++) {
+                tabFragments.get(i).refresh();
+            }
+        } catch (NullPointerException e) {
+            initTabs();
         }
     }
 
@@ -247,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             try {
                 startActivity(Intent.createChooser(i, "Email senden..."));
             } catch (android.content.ActivityNotFoundException ex) {
-                Toast.makeText(MainActivity.this, "Keine E-Mail App gefunden.", Toast.LENGTH_SHORT).show();
+                Snackbar.make(findViewById(R.id.content_main2), "Keine E-Mail App gefunden.", Snackbar.LENGTH_SHORT).show();
             }
 
         } else if (id == R.id.nav_send) {
@@ -289,24 +293,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Intent intent = new Intent(this.context, LoginActivity.class);
                     startActivity(intent);
                 } else {
-                    Toast toast = Toast.makeText(this.context, "Keine Verbindung möglich.", Toast.LENGTH_SHORT);
-                    toast.show();
+                    Snackbar.make(findViewById(R.id.content_main2), "Keine Verbindung möglich.", Snackbar.LENGTH_SHORT).show();
                 }
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { //.equals() causes crash on <4.0 devices
                 if (Objects.equals(compare1, compare3)) {
-                    Toast toast = Toast.makeText(context, "Plan ist bereits aktuell."/*: " + Schedule.getUpdateDate(1, context)*/, Toast.LENGTH_LONG);
-                    toast.show();
+                    Snackbar.make(findViewById(R.id.content_main2), "Plan ist bereits aktuell.", Snackbar.LENGTH_SHORT).show();
                 } else {
-                    Toast toast = Toast.makeText(context, "Neuer Plan geladen: " + Schedule.getUpdateDate(context), Toast.LENGTH_LONG);
-                    toast.show();
+                    Snackbar.make(findViewById(R.id.content_main2), "Neuer Plan geladen: " + Schedule.getUpdateDate(context), Snackbar.LENGTH_SHORT).show();
                     initTabs();
                 }
             } else {
                 initTabs();
             }
 
-            for (int i = 0; i < tabFragments.size(); i++) {
-                tabFragments.get(i).swipeRefreshOff();
+            try {
+                for (int i = 0; i < tabFragments.size(); i++) {
+                    tabFragments.get(i).swipeRefreshOff();
+                }
+            } catch (NullPointerException e) {
+                initTabs();
             }
         }
     }
